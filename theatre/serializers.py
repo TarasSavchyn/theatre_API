@@ -38,6 +38,7 @@ class PlayListSerializer(PlaySerializer):
 
 
 
+
 class PlayDetailSerializer(PlaySerializer):
     genres = GenreSerializer(many=True, read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
@@ -59,12 +60,21 @@ class PerformanceListSerializer(serializers.ModelSerializer):
     theatre_hall_capacity = serializers.IntegerField(source="theatre_hall.capacity", read_only=True)
     theatre_hall_name = serializers.CharField(source="theatre_hall.name", read_only=True)
 
+    available_tickets = serializers.SerializerMethodField()
+
+    def get_available_tickets(self, obj):
+        reserved_tickets = obj.reservation_set.count()
+        total_tickets = obj.theatre_hall.rows * obj.theatre_hall.seats_in_row
+        available_tickets = total_tickets - reserved_tickets
+        return available_tickets
+
     class Meta:
         model = Performance
         fields = [
             "id",
             "play_title",
             "theatre_hall_capacity",
+            "available_tickets",
             "theatre_hall_name",
             "show_time",
         ]
