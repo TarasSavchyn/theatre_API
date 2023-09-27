@@ -21,7 +21,7 @@ def actor_foto_file_path(instance, filename):
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.full_name)}-{uuid.uuid4()}{extension}"
 
-    return os.path.join("uploads/movies/", filename)
+    return os.path.join("uploads/theater/", filename)
 
 class Actor(models.Model):
     first_name = models.CharField(max_length=100)
@@ -52,7 +52,11 @@ class Play(models.Model):
 class TheatreHall(models.Model):
     name = models.CharField(max_length=100)
     rows = models.PositiveIntegerField()
-    seats_in_rows = models.PositiveIntegerField()
+    seats_in_row = models.PositiveIntegerField()
+
+    @property
+    def capacity(self):
+        return self.rows * self.seats_in_row
 
     def __str__(self):
         return self.name
