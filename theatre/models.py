@@ -19,7 +19,7 @@ class Genre(models.Model):
 
 def actor_foto_file_path(instance, filename):
     _, extension = os.path.splitext(filename)
-    filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
+    filename = f"{slugify(instance.full_name)}-{uuid.uuid4()}{extension}"
 
     return os.path.join("uploads/movies/", filename)
 
@@ -27,6 +27,10 @@ class Actor(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     foto = models.ImageField(upload_to=actor_foto_file_path, null=True, blank=True)
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
