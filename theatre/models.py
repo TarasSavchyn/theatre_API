@@ -1,7 +1,10 @@
+import os
+import uuid
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-
+from django.utils.text import slugify
 
 
 class Genre(models.Model):
@@ -13,9 +16,17 @@ class Genre(models.Model):
     class Meta:
         ordering = ["name", ]
 
+
+def actor_foto_file_path(instance, filename):
+    _, extension = os.path.splitext(filename)
+    filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
+
+    return os.path.join("uploads/movies/", filename)
+
 class Actor(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    foto = models.ImageField(upload_to=actor_foto_file_path, null=True, blank=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

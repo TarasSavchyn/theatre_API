@@ -22,4 +22,5 @@ router.register(r'tickets', TicketViewSet)
 
 urlpatterns = router.urls
 
+app_name = "theatre"
 
