@@ -69,6 +69,14 @@ class Performance(models.Model):
     theatre_hall = models.ForeignKey(TheatreHall, on_delete=models.CASCADE)
     show_time = models.DateTimeField()
 
+    @property
+    def available_tickets(self):
+        reserved_tickets = self.reservation_set.count()
+        total_tickets = self.theatre_hall.rows * self.theatre_hall.seats_in_row
+        available_tickets = total_tickets - reserved_tickets
+        return available_tickets
+
+
     def __str__(self):
         return f"{self.play.title} at {self.theatre_hall.name}, {self.show_time}"
 

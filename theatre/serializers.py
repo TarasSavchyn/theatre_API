@@ -9,7 +9,7 @@ class GenreSerializer(serializers.ModelSerializer):
 class ActorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = '__all__'
+        fields = ["id", "first_name", "last_name", "full_name", "foto"]
 
 
 # class ActorFotoSerializer(serializers.ModelSerializer):
@@ -48,25 +48,25 @@ class PlayDetailSerializer(PlaySerializer):
 class TheatreHallSerializer(serializers.ModelSerializer):
     class Meta:
         model = TheatreHall
-        fields = '__all__'
+        fields = ["id", "name", "rows", "seats_in_row", "capacity"]
 
 class PerformanceSerializer(serializers.ModelSerializer):
+    available_tickets = serializers.SerializerMethodField()
+
     class Meta:
         model = Performance
-        fields = '__all__'
+        fields = ["id", "play", "theatre_hall", "show_time", "available_tickets"]
+
+    def get_available_tickets(self, obj):
+        return obj.available_tickets
+
+
 
 class PerformanceListSerializer(serializers.ModelSerializer):
     play_title = serializers.CharField(source="play.title", read_only=True)
     theatre_hall_capacity = serializers.IntegerField(source="theatre_hall.capacity", read_only=True)
     theatre_hall_name = serializers.CharField(source="theatre_hall.name", read_only=True)
-
-    available_tickets = serializers.SerializerMethodField()
-
-    def get_available_tickets(self, obj):
-        reserved_tickets = obj.reservation_set.count()
-        total_tickets = obj.theatre_hall.rows * obj.theatre_hall.seats_in_row
-        available_tickets = total_tickets - reserved_tickets
-        return available_tickets
+    available_tickets = serializers.IntegerField()
 
     class Meta:
         model = Performance
@@ -82,6 +82,16 @@ class PerformanceListSerializer(serializers.ModelSerializer):
 class PerformanceDetailSerializer(PerformanceSerializer):
     play = PlayListSerializer(many=False, read_only=True)
     theatre_hall = TheatreHallSerializer(many=False, read_only=True)
+    available_tickets = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Performance
+        fields = ["id", "play", "theatre_hall", "show_time", "available_tickets"]
+
+
+
+
+
 
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
