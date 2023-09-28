@@ -90,6 +90,7 @@ class Reservation(models.Model):
         on_delete=models.CASCADE
     )
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
+    status = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["created_at", ]

@@ -1,4 +1,7 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from .models import Play, Genre, Actor, TheatreHall, Performance, Reservation, Ticket
 from .serializers import (
     PlaySerializer,
@@ -51,6 +54,13 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+
+    @action(detail=True, methods=['POST'])
+    def cancel_reservation(self, request, pk=None):
+        reservation = self.get_object()
+        reservation.status = False
+        reservation.save()
+        return Response({"message": "Reservation has been canceled."})
 
 class TicketViewSet(viewsets.ModelViewSet):
     queryset = Ticket.objects.all()
