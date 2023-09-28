@@ -71,7 +71,7 @@ class Performance(models.Model):
 
     @property
     def available_tickets(self):
-        reserved_tickets = self.reservation_set.count()
+        reserved_tickets = self.reservation_set.filter(status=True).count()
         total_tickets = self.theatre_hall.rows * self.theatre_hall.seats_in_row
         available_tickets = total_tickets - reserved_tickets
         return available_tickets
@@ -128,6 +128,10 @@ class Ticket(models.Model):
             self.performance.theatre_hall,
             ValidationError,
         )
+
+        available_tickets = self.performance.available_tickets
+        if available_tickets is not None and available_tickets <= 0:
+            raise ValidationError("No available tickets for this performance.")
 
     def save(
         self,

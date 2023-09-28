@@ -91,7 +91,14 @@ class PerformanceDetailSerializer(PerformanceSerializer):
 class ReservationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reservation
-        fields = '__all__'
+        fields = ["id", "created_at", "performance", "status"]
+
+
+
+class ReservationDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reservation
+        fields = ["id", "user", "created_at", "performance", "status"]
 
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:

@@ -11,6 +11,7 @@ from .serializers import (
     PerformanceSerializer,
     ReservationSerializer,
     TicketSerializer, PerformanceListSerializer, PerformanceDetailSerializer, PlayListSerializer, PlayDetailSerializer,
+    ReservationDetailSerializer,
 )
 
 class PlayViewSet(viewsets.ModelViewSet):
@@ -54,6 +55,21 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+
+    def get_serializer_class(self):
+        # if self.action == "list":
+        #     return ReservationListSerializer
+
+        if self.action == "retrieve":
+            return ReservationDetailSerializer
+
+        return ReservationSerializer
+
+    def get_queryset(self):
+        return Reservation.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['POST'])
     def cancel_reservation(self, request, pk=None):
