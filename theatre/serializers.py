@@ -99,6 +99,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ("id", "tickets", "created_at")
 
+    @transaction.atomic  # Додаємо декоратор транзакції
     def create(self, validated_data):
         tickets_data = validated_data.pop('tickets', [])
 
@@ -106,7 +107,7 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         for ticket_data in tickets_data:
             performance_id = ticket_data.pop('performance')
-            Ticket.objects.create(reservation=reservation, performance=performance_id, **ticket_data)
+            Ticket.objects.create(reservation=reservation, performance_id=performance_id, **ticket_data)
 
         return reservation
 
