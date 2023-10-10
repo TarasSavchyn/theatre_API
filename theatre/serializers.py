@@ -98,6 +98,14 @@ class TicketListSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = ("id", "performance_name", "performance_hall", "row", "seat")
 
+
+
+class TicketDetailSerializer(serializers.ModelSerializer):
+    performance = PerformanceSerializer(many=False, read_only=True)
+    class Meta:
+        model = Ticket
+        fields = ("id", "performance", "row", "seat")
+
 class ReservationSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(many=True, read_only=False)
 
@@ -125,6 +133,13 @@ class ReservationListSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ("id", "created_at", "status", "tickets")
 
+
+class ReservationDetailSerializer(serializers.ModelSerializer):
+    tickets = TicketDetailSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Reservation
+        fields = "__all__"
 
 
 

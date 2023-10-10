@@ -11,7 +11,7 @@ from .serializers import (
     PerformanceSerializer,
     ReservationSerializer,
     TicketSerializer, PerformanceListSerializer, PerformanceDetailSerializer, PlayListSerializer, PlayDetailSerializer,
-    ReservationListSerializer,
+    ReservationListSerializer, ReservationDetailSerializer,
 )
 
 class PlayViewSet(viewsets.ModelViewSet):
@@ -60,8 +60,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
         if self.action == "list":
             return ReservationListSerializer
 
-        # if self.action == "retrieve":
-        #     return ReservationDetailSerializer
+        if self.action == "retrieve":
+            return ReservationDetailSerializer
 
         return ReservationSerializer
 
