@@ -91,6 +91,12 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = '__all__'
 
+class TicketListSerializer(serializers.ModelSerializer):
+    performance_name = serializers.CharField(source="performance.play.title", read_only=True)
+    performance_hall = serializers.CharField(source="performance.theatre_hall.name", read_only=True)
+    class Meta:
+        model = Ticket
+        fields = ("id", "performance_name", "performance_hall", "row", "seat")
 
 class ReservationSerializer(serializers.ModelSerializer):
     tickets = TicketSerializer(many=True, read_only=False)
@@ -99,7 +105,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ("id", "tickets", "created_at")
 
-    @transaction.atomic  # Додаємо декоратор транзакції
+    @transaction.atomic
     def create(self, validated_data):
         tickets_data = validated_data.pop('tickets', [])
 
@@ -110,6 +116,14 @@ class ReservationSerializer(serializers.ModelSerializer):
             Ticket.objects.create(reservation=reservation, performance_id=performance_id, **ticket_data)
 
         return reservation
+
+
+class ReservationListSerializer(serializers.ModelSerializer):
+    tickets = TicketListSerializer(read_only=True, many=True)
+
+    class Meta:
+        model = Reservation
+        fields = ("id", "created_at", "status", "tickets")
 
 
 

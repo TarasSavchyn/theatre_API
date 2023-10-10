@@ -11,6 +11,7 @@ from .serializers import (
     PerformanceSerializer,
     ReservationSerializer,
     TicketSerializer, PerformanceListSerializer, PerformanceDetailSerializer, PlayListSerializer, PlayDetailSerializer,
+    ReservationListSerializer,
 )
 
 class PlayViewSet(viewsets.ModelViewSet):
@@ -56,8 +57,8 @@ class ReservationViewSet(viewsets.ModelViewSet):
     serializer_class = ReservationSerializer
 
     def get_serializer_class(self):
-        # if self.action == "list":
-        #     return ReservationListSerializer
+        if self.action == "list":
+            return ReservationListSerializer
 
         # if self.action == "retrieve":
         #     return ReservationDetailSerializer
