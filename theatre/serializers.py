@@ -92,6 +92,19 @@ class TicketSerializer(serializers.ModelSerializer):
         model = Ticket
         fields = '__all__'
 
+    def validate(self, data):
+        performance = data['performance']
+        row = data['row']
+        seat = data['seat']
+
+        existing_tickets = Ticket.objects.filter(performance=performance, row=row, seat=seat, reservation__status=True)
+
+        if existing_tickets.exists():
+            raise serializers.ValidationError("This place is already booked")
+
+        return data
+
+
 class TicketListSerializer(serializers.ModelSerializer):
     performance_name = serializers.CharField(source="performance.play.title", read_only=True)
     performance_hall = serializers.CharField(source="performance.theatre_hall.name", read_only=True)

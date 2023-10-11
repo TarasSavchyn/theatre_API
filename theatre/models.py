@@ -4,6 +4,7 @@ import uuid
 from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
+from rest_framework.exceptions import ValidationError
 
 
 class Genre(models.Model):
@@ -106,5 +107,5 @@ class Ticket(models.Model):
         return f"Ticket for {self.performance.play.title}, Row {self.row}, Seat {self.seat}"
 
     class Meta:
-        unique_together = ("performance", "row", "seat", )
+        # unique_together = ("performance", "row", "seat")
         ordering = ["row", "seat"]
