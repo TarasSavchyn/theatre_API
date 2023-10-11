@@ -6,7 +6,7 @@ from .models import Play, Genre, Actor, TheatreHall, Performance, Reservation, T
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
-        fields = "__all__"
+        fields = ("id", "name")
 
 
 class ActorSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class ActorSerializer(serializers.ModelSerializer):
 class PlaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Play
-        fields = "__all__"
+        fields = ("id", "title", "description", "genres", "actors")
 
 
 class PlayListSerializer(PlaySerializer):
@@ -88,13 +88,14 @@ class PerformanceDetailSerializer(PerformanceSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
-        fields = "__all__"
+        fields = ("id", "row", "seat", "performance", "reservation")
 
     def validate(self, data):
         performance = data["performance"]
         row = data["row"]
         seat = data["seat"]
 
+        # checking Invalid row or seat values
         theatre_hall = TheatreHall.objects.get(pk=performance.theatre_hall_id)
 
         if (
@@ -105,6 +106,7 @@ class TicketSerializer(serializers.ModelSerializer):
         ):
             raise serializers.ValidationError("Invalid row or seat values")
 
+        # checking booked places
         existing_tickets = Ticket.objects.filter(
             performance=performance, row=row, seat=seat, reservation__status=True
         )
@@ -172,4 +174,4 @@ class ReservationDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
-        fields = "__all__"
+        fields = ("id", "created_at", "user", "status", "tickets")

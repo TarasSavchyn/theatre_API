@@ -106,7 +106,7 @@ class Reservation(models.Model):
         ]
 
     def __str__(self):
-        return f"Reservation by {self.user.username}"
+        return f"Reservation by {self.user.first_name} {self.user.last_name}"
 
 
 class Ticket(models.Model):
@@ -125,5 +125,4 @@ class Ticket(models.Model):
         return f"Ticket for {self.performance.play.title}, Row {self.row}, Seat {self.seat}"
 
     class Meta:
-        # unique_together = ("performance", "row", "seat")
         ordering = ["row", "seat"]
