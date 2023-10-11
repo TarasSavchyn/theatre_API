@@ -97,6 +97,12 @@ class TicketSerializer(serializers.ModelSerializer):
         row = data['row']
         seat = data['seat']
 
+        theatre_hall = TheatreHall.objects.get(pk=performance.theatre_hall_id)
+
+        if row < 1 or seat < 1 or row > theatre_hall.rows or seat > theatre_hall.seats_in_row:
+            raise serializers.ValidationError("Invalid row or seat values")
+
+
         existing_tickets = Ticket.objects.filter(performance=performance, row=row, seat=seat, reservation__status=True)
 
         if existing_tickets.exists():
