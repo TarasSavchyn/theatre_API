@@ -14,7 +14,9 @@ class Genre(models.Model):
         return self.name
 
     class Meta:
-        ordering = ["name", ]
+        ordering = [
+            "name",
+        ]
 
 
 def actor_foto_file_path(instance, filename):
@@ -22,6 +24,7 @@ def actor_foto_file_path(instance, filename):
     filename = f"{slugify(instance.full_name)}-{uuid.uuid4()}{extension}"
 
     return os.path.join("uploads/theater/", filename)
+
 
 class Actor(models.Model):
     first_name = models.CharField(max_length=100)
@@ -34,8 +37,10 @@ class Actor(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
     class Meta:
         ordering = ["first_name", "last_name"]
+
 
 class Play(models.Model):
     title = models.CharField(max_length=200)
@@ -47,7 +52,10 @@ class Play(models.Model):
         return self.title
 
     class Meta:
-        ordering = ["title", ]
+        ordering = [
+            "title",
+        ]
+
 
 class TheatreHall(models.Model):
     name = models.CharField(max_length=100)
@@ -62,7 +70,10 @@ class TheatreHall(models.Model):
         return self.name
 
     class Meta:
-        ordering = ["name", ]
+        ordering = [
+            "name",
+        ]
+
 
 class Performance(models.Model):
     play = models.ForeignKey(Play, on_delete=models.CASCADE)
@@ -75,33 +86,40 @@ class Performance(models.Model):
         total_tickets = self.theatre_hall.capacity
         return total_tickets - reserved_tickets
 
-
     def __str__(self):
         return f"{self.play.title} at {self.theatre_hall.name}, {self.show_time}"
 
     class Meta:
-        ordering = ["show_time", ]
+        ordering = [
+            "show_time",
+        ]
+
 
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.BooleanField(default=True)
 
     class Meta:
-        ordering = ["created_at", ]
+        ordering = [
+            "created_at",
+        ]
 
     def __str__(self):
         return f"Reservation by {self.user.username}"
+
 
 class Ticket(models.Model):
     row = models.PositiveIntegerField()
     seat = models.PositiveIntegerField()
     performance = models.ForeignKey(Performance, on_delete=models.CASCADE)
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="tickets", blank=True, null=True)
-
+    reservation = models.ForeignKey(
+        Reservation,
+        on_delete=models.CASCADE,
+        related_name="tickets",
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         return f"Ticket for {self.performance.play.title}, Row {self.row}, Seat {self.seat}"
