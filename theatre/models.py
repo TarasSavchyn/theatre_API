@@ -2,7 +2,6 @@ import os
 import uuid
 
 from django.conf import settings
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
 
@@ -71,10 +70,9 @@ class Performance(models.Model):
 
     @property
     def available_tickets(self):
-        reserved_tickets = self.reservation_set.filter(status=True).count()
-        total_tickets = self.theatre_hall.rows * self.theatre_hall.seats_in_row
-        available_tickets = total_tickets - reserved_tickets
-        return available_tickets
+        reserved_tickets = self.ticket_set.filter(reservation__status=True).count()
+        total_tickets = self.theatre_hall.capacity
+        return total_tickets - reserved_tickets
 
 
     def __str__(self):
@@ -89,7 +87,7 @@ class Reservation(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
-    status = models.BooleanField(default=True, blank=True, null=True)
+    status = models.BooleanField(default=True)
 
     class Meta:
         ordering = ["created_at", ]
@@ -104,11 +102,9 @@ class Ticket(models.Model):
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name="tickets", blank=True, null=True)
 
 
-
-
     def __str__(self):
         return f"Ticket for {self.performance.play.title}, Row {self.row}, Seat {self.seat}"
 
     class Meta:
-        unique_together = ("performance", "row", "seat")
+        unique_together = ("performance", "row", "seat", )
         ordering = ["row", "seat"]

@@ -77,7 +77,3 @@ class ReservationViewSet(viewsets.ModelViewSet):
         reservation.status = False
         reservation.save()
         return Response({"message": "Reservation has been canceled."})
-
-class TicketViewSet(viewsets.ModelViewSet):
-    queryset = Ticket.objects.all()
-    serializer_class = TicketSerializer

@@ -52,7 +52,6 @@ class TheatreHallSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "rows", "seats_in_row", "capacity"]
 
 class PerformanceSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Performance
         fields = ["id", "play", "theatre_hall", "show_time"]
@@ -63,6 +62,7 @@ class PerformanceListSerializer(serializers.ModelSerializer):
     play_title = serializers.CharField(source="play.title", read_only=True)
     theatre_hall_capacity = serializers.IntegerField(source="theatre_hall.capacity", read_only=True)
     theatre_hall_name = serializers.CharField(source="theatre_hall.name", read_only=True)
+    available_tickets = serializers.CharField(read_only=True)
 
     class Meta:
         model = Performance
@@ -70,19 +70,20 @@ class PerformanceListSerializer(serializers.ModelSerializer):
             "id",
             "play_title",
             "theatre_hall_capacity",
-            "available_tickets",
             "theatre_hall_name",
             "show_time",
+            "available_tickets",
         ]
 
 class PerformanceDetailSerializer(PerformanceSerializer):
     play = PlayListSerializer(many=False, read_only=True)
     theatre_hall = TheatreHallSerializer(many=False, read_only=True)
-
+    available_tickets = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Performance
         fields = ["id", "play", "theatre_hall", "show_time", "available_tickets"]
+
 
 
 
@@ -120,7 +121,8 @@ class ReservationSerializer(serializers.ModelSerializer):
         reservation = Reservation.objects.create(**validated_data)
 
         for ticket_data in tickets_data:
-            performance_id = ticket_data.pop('performance')
+            performance = ticket_data['performance']
+            performance_id = performance.id  # Отримати ID вистави з об'єкта вистави
             Ticket.objects.create(reservation=reservation, performance_id=performance_id, **ticket_data)
 
         return reservation
