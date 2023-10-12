@@ -79,6 +79,18 @@ class ActorViewSet(viewsets.ModelViewSet):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
 
+    def get_queryset(self):
+        queryset = Actor.objects.all()
+
+        # add filtering by full_name
+        full_name = self.request.query_params.get("full_name")
+
+        if full_name:
+            queryset = queryset.filter(Q(first_name__icontains=full_name) | Q(last_name__icontains=full_name))
+
+        return queryset
+
+
 
 class TheatreHallViewSet(viewsets.ModelViewSet):
     queryset = TheatreHall.objects.all()
