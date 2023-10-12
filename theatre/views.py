@@ -63,6 +63,17 @@ class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
+    def get_queryset(self):
+        queryset = Genre.objects.all()
+
+        # filtering by name
+        name = self.request.query_params.get("name")
+
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
 
 class ActorViewSet(viewsets.ModelViewSet):
     queryset = Actor.objects.all()
