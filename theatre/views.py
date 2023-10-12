@@ -101,6 +101,18 @@ class GenreViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                type={"type": "string"},
+                description="Filter genres by name.",
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class ActorViewSet(viewsets.ModelViewSet):
     queryset = Actor.objects.all()
