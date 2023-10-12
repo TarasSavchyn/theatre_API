@@ -107,6 +107,7 @@ class GenreViewSet(viewsets.ModelViewSet):
                 name="name",
                 type={"type": "string"},
                 description="Filter genres by name.",
+                required=False,
             )
         ]
     )
@@ -131,6 +132,19 @@ class ActorViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="full_name",
+                type={"type": "string"},
+                description="Filter actors by full name.",
+                required=False,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 
 
@@ -148,6 +162,19 @@ class TheatreHallViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name)
 
         return queryset
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                type={"type": "string"},
+                description="Filter theatre halls by name.",
+                required=False,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class PerformanceViewSet(viewsets.ModelViewSet):
