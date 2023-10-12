@@ -1,4 +1,9 @@
+from datetime import date
+
+
 from django.db.models import Q
+
+from rest_framework.exceptions import ParseError
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -110,6 +115,26 @@ class TheatreHallViewSet(viewsets.ModelViewSet):
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
+    serializer_class = PerformanceSerializer
+
+    def get_queryset(self):
+        queryset = Performance.objects.all()
+
+        # filtering by data
+        date_param = self.request.query_params.get("date")
+
+        if date_param:
+            try:
+                performance_date = date.fromisoformat(date_param)
+                queryset = queryset.filter(show_time__date=performance_date)
+            except ValueError as e:
+                raise ParseError("Incorrect date format. Use the format 'YYYY-MM-DD'.")
+
+        return queryset
+
+
+
+
 
     def get_serializer_class(self):
         if self.action == "list":
