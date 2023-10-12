@@ -97,6 +97,17 @@ class TheatreHallViewSet(viewsets.ModelViewSet):
     serializer_class = TheatreHallSerializer
 
 
+    def get_queryset(self):
+        queryset = TheatreHall.objects.all()
+
+        # filtering by name
+        name = self.request.query_params.get("name")
+
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
 
