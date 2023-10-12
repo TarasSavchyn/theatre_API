@@ -145,6 +145,7 @@ class ReservationSerializer(serializers.ModelSerializer):
         model = Reservation
         fields = ("id", "tickets", "created_at")
 
+
     @transaction.atomic
     def create(self, validated_data):
         tickets_data = validated_data.pop("tickets", [])

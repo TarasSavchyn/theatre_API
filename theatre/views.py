@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -22,6 +23,31 @@ from .serializers import (
 
 class PlayViewSet(viewsets.ModelViewSet):
     queryset = Play.objects.all()
+
+    def get_queryset(self):
+        queryset = Play.objects.all()
+
+        # filtering by genres
+        genres = self.request.query_params.get("genres")
+        if genres:
+            genres_ids = [int(str_id) for str_id in genres.split(",")]
+            queryset = Play.objects.filter(genres__id__in=genres_ids)
+
+            for genre_id in genres_ids:
+                queryset = queryset.filter(genres__id=genre_id)
+
+        # filtering by actors
+        actors = self.request.query_params.get("actors")
+        if actors:
+            actors_ids = [int(str_id) for str_id in actors.split(",")]
+            queryset = Play.objects.filter(actors__id__in=actors_ids)
+
+            for actor_id in actors_ids:
+                queryset = queryset.filter(actors__id=actor_id)
+
+        return queryset.distinct()
+
+
 
     def get_serializer_class(self):
         if self.action == "list":
