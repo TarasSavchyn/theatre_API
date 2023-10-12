@@ -2,6 +2,7 @@ from datetime import date
 
 
 from django.db.models import Q
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from rest_framework.exceptions import ParseError
 from rest_framework import viewsets
@@ -16,7 +17,6 @@ from .serializers import (
     TheatreHallSerializer,
     PerformanceSerializer,
     ReservationSerializer,
-    TicketSerializer,
     PerformanceListSerializer,
     PerformanceDetailSerializer,
     PlayListSerializer,
@@ -52,8 +52,6 @@ class PlayViewSet(viewsets.ModelViewSet):
 
         return queryset.distinct()
 
-
-
     def get_serializer_class(self):
         if self.action == "list":
             return PlayListSerializer
@@ -62,6 +60,30 @@ class PlayViewSet(viewsets.ModelViewSet):
             return PlayDetailSerializer
 
         return PlaySerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="genres",
+                type={"type": "array", "items": {"type": "number"}},
+                description="A list of genre IDs for filtering plays by genre.",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="actors",
+                type={"type": "array", "items": {"type": "number"}},
+                description="A list of actor IDs for filtering plays by actor.",
+                required=False,
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+
+
+
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -91,16 +113,18 @@ class ActorViewSet(viewsets.ModelViewSet):
         full_name = self.request.query_params.get("full_name")
 
         if full_name:
-            queryset = queryset.filter(Q(first_name__icontains=full_name) | Q(last_name__icontains=full_name))
+            queryset = queryset.filter(
+                Q(first_name__icontains=full_name) | Q(last_name__icontains=full_name)
+            )
 
         return queryset
+
 
 
 
 class TheatreHallViewSet(viewsets.ModelViewSet):
     queryset = TheatreHall.objects.all()
     serializer_class = TheatreHallSerializer
-
 
     def get_queryset(self):
         queryset = TheatreHall.objects.all()
@@ -112,6 +136,7 @@ class TheatreHallViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(name__icontains=name)
 
         return queryset
+
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.all()
@@ -131,10 +156,6 @@ class PerformanceViewSet(viewsets.ModelViewSet):
                 raise ParseError("Incorrect date format. Use the format 'YYYY-MM-DD'.")
 
         return queryset
-
-
-
-
 
     def get_serializer_class(self):
         if self.action == "list":
