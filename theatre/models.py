@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 
 
 class Genre(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
@@ -43,7 +43,7 @@ class Actor(models.Model):
 
 
 class Play(models.Model):
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=200, unique=True)
     description = models.TextField()
     genres = models.ManyToManyField(Genre)
     actors = models.ManyToManyField(Actor)
@@ -58,7 +58,7 @@ class Play(models.Model):
 
 
 class TheatreHall(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     rows = models.PositiveIntegerField()
     seats_in_row = models.PositiveIntegerField()
 
