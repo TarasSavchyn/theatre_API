@@ -49,10 +49,10 @@ class ActorFotoSerializer(serializers.ModelSerializer):
 class PlaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Play
-        fields = ("id", "title", "description", "genres", "actors")
+        fields = ("id", "title", "description", "genres", "actors",)
 
 
-class PlayListSerializer(PlaySerializer):
+class PlayListSerializer(serializers.ModelSerializer):
     genres = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
     actors = serializers.SlugRelatedField(
         many=True,
@@ -60,10 +60,22 @@ class PlayListSerializer(PlaySerializer):
         slug_field="full_name",
     )
 
+    class Meta:
+        model = Play
+        fields = ("id", "title", "description", "genres", "actors", "average_rating")
 
-class PlayDetailSerializer(PlaySerializer):
+
+class PlayDetailSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True, read_only=True)
     actors = ActorSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Play
+        fields = ("id", "title", "description", "genres", "actors", "average_rating")
+
+
+class SetRatingSerializer(serializers.Serializer):
+    mark = serializers.DecimalField(max_digits=5, decimal_places=2)
 
 
 class TheatreHallSerializer(serializers.ModelSerializer):
@@ -100,7 +112,7 @@ class PerformanceListSerializer(serializers.ModelSerializer):
         ]
 
 
-class PerformanceDetailSerializer(PerformanceSerializer):
+class PerformanceDetailSerializer(serializers.ModelSerializer):
     play = PlayListSerializer(many=False, read_only=True)
     theatre_hall = TheatreHallSerializer(many=False, read_only=True)
     available_tickets = serializers.IntegerField(read_only=True)

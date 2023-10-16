@@ -3,6 +3,7 @@ import uuid
 
 from django.conf import settings
 from django.db import models
+from django.db.models import Avg
 from django.utils.text import slugify
 from rest_framework.exceptions import ValidationError
 
@@ -47,6 +48,14 @@ class Play(models.Model):
     description = models.TextField()
     genres = models.ManyToManyField(Genre)
     actors = models.ManyToManyField(Actor)
+
+    average_rating = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+
+
+    def update_average_rating(self):
+        average = Rating.objects.filter(play=self).aggregate(Avg('mark'))['mark__avg']
+        self.average_rating = round(average, 2) if average is not None else None
+        self.save()
 
     def __str__(self):
         return self.title
@@ -126,3 +135,22 @@ class Ticket(models.Model):
 
     class Meta:
         ordering = ["row", "seat"]
+
+
+class Rating(models.Model):
+    play = models.ForeignKey(Play, on_delete=models.CASCADE)
+    mark = models.DecimalField(max_digits=5, decimal_places=2)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"Rating for {self.play.title}: {self.mark}"
+
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.play.update_average_rating()
+
+    class Meta:
+        unique_together = ["play", "user"]
+
+
+

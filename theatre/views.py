@@ -2,7 +2,7 @@ from datetime import date
 
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
-from django.db.models import Q
+from django.db.models import Q, Avg
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from rest_framework.exceptions import ParseError
@@ -10,7 +10,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Play, Genre, Actor, TheatreHall, Performance, Reservation, Ticket
+from .models import Play, Genre, Actor, TheatreHall, Performance, Reservation, Ticket, Rating
 from .serializers import (
     PlaySerializer,
     GenreSerializer,
@@ -23,7 +23,7 @@ from .serializers import (
     PlayListSerializer,
     PlayDetailSerializer,
     ReservationListSerializer,
-    ReservationDetailSerializer, ActorFotoSerializer, ActorListSerializer, ActorDetailSerializer,
+    ReservationDetailSerializer, ActorFotoSerializer, ActorListSerializer, ActorDetailSerializer, SetRatingSerializer,
 )
 
 
@@ -60,7 +60,40 @@ class PlayViewSet(viewsets.ModelViewSet):
         if self.action == "retrieve":
             return PlayDetailSerializer
 
+        if self.action == "evaluate":
+            return SetRatingSerializer
+
         return PlaySerializer
+
+
+
+
+    @action(
+        detail=True,
+        methods=['POST'],
+        serializer_class=SetRatingSerializer,
+        url_path="evaluate",
+        permission_classes=[IsAuthenticated, ]
+    )
+    def evaluate(self, request, pk=None):
+        play = self.get_object()
+
+        # Check if the user has already rated the play
+        user = request.user  # Assuming you have authentication and the user object in the request
+        existing_rating = Rating.objects.filter(play=play, user=user).first()
+
+        if existing_rating:
+            existing_rating.mark = request.data['mark']
+            existing_rating.save()
+        else:
+            new_rating = Rating(play=play, user=user, mark=request.data['mark'])
+            new_rating.save()
+
+        return Response({'message': 'Rating set successfully.'}, status=status.HTTP_200_OK)
+
+
+
+
 
     @extend_schema(
         parameters=[
