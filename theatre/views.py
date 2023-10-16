@@ -1,6 +1,6 @@
 from datetime import date
 
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
 from django.db.models import Q
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -216,6 +216,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 class ReservationViewSet(viewsets.ModelViewSet):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action == "list":
