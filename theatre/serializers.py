@@ -27,11 +27,15 @@ class ActorListSerializer(serializers.ModelSerializer):
 
 class ActorDetailSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
-    # filmography = ????
+    filmography = serializers.SerializerMethodField()
 
     class Meta:
         model = Actor
-        fields = ["id", "first_name", "last_name", "full_name", "foto"]
+        fields = ["id", "first_name", "last_name", "full_name", "foto", "filmography"]
+
+    def get_filmography(self, actor):
+        filmography = [play.title for play in actor.play_set.all()]
+        return filmography
 
 
 
