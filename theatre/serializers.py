@@ -14,13 +14,32 @@ class ActorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Actor
+        fields = ["id", "first_name", "last_name", "full_name", ]
+
+
+class ActorListSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Actor
         fields = ["id", "first_name", "last_name", "full_name", "foto"]
 
 
-# class ActorFotoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Actor
-#         fields = ("id", 'foto', )
+class ActorDetailSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(read_only=True)
+    # filmography = ????
+
+    class Meta:
+        model = Actor
+        fields = ["id", "first_name", "last_name", "full_name", "foto"]
+
+
+
+
+class ActorFotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Actor
+        fields = ("id", 'foto', )
 
 
 class PlaySerializer(serializers.ModelSerializer):
