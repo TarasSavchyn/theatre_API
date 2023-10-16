@@ -1,5 +1,6 @@
 from datetime import date
 
+from rest_framework.permissions import IsAdminUser
 
 from django.db.models import Q
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -74,16 +75,11 @@ class PlayViewSet(viewsets.ModelViewSet):
                 type={"type": "array", "items": {"type": "number"}},
                 description="A list of actor IDs for filtering plays by actor.",
                 required=False,
-            )
+            ),
         ]
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-
-
-
-
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -122,7 +118,7 @@ class ActorViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Actor.objects.all()
 
-        # add filtering by full_name
+        # filtering by full_name
         full_name = self.request.query_params.get("full_name")
 
         if full_name:
@@ -144,8 +140,6 @@ class ActorViewSet(viewsets.ModelViewSet):
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-
-
 
 
 class TheatreHallViewSet(viewsets.ModelViewSet):
