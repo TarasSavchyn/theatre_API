@@ -1,34 +1,36 @@
 from django.test import TestCase
+from django.urls import reverse
+
 from theatre.models import TheatreHall
 
 from rest_framework import status
 from rest_framework.test import APIClient
 from user.models import User
 
+
 class TheatreHallAccessTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
-            email='test@test.ua',
-            password='test123'
-        )
+        self.user = User.objects.create_user(email="test@test.ua", password="test123")
         self.theatre_hall = TheatreHall.objects.create(
-            name='Test Hall',
-            rows=10,
-            seats_in_row=10
+            name="Test Hall", rows=10, seats_in_row=10
         )
 
     def test_unauthenticated_user_cannot_access_theatrehall_list_details(self):
-        response = self.client.get("/api/theatre/theatrehalls/")
+        response = self.client.get(reverse("theatre:theatrehall-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        response = self.client.get(f"/api/theatre/theatrehalls/{self.theatre_hall.id}/")
+        response = self.client.get(
+            reverse("theatre:theatrehall-detail", args=[self.theatre_hall.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_theatrehall_list_details(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get("/api/theatre/theatrehalls/")
+        response = self.client.get(reverse("theatre:theatrehall-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get(f"/api/theatre/theatrehalls/{self.theatre_hall.id}/")
+        response = self.client.get(
+            reverse("theatre:theatrehall-detail", args=[self.theatre_hall.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 

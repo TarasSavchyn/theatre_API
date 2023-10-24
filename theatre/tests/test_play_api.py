@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.urls import reverse
+
 from theatre.models import Play, Genre, Actor
 
 
@@ -10,26 +12,22 @@ from user.models import User
 class PlayAccessTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
-            email='test@test.ua',
-            password='test123'
-        )
+        self.user = User.objects.create_user(email="test@test.ua", password="test123")
         self.play = Play.objects.create(
-            title='Test Play',
-            description='Description of the test play'
+            title="Test Play", description="Description of the test play"
         )
 
     def test_unauthenticated_user_cannot_access_play_list_details(self):
-        response = self.client.get("/api/theatre/plays/")
+        response = self.client.get(reverse("theatre:play-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        response = self.client.get(f"/api/theatre/plays/{self.play.id}/")
+        response = self.client.get(reverse("theatre:play-detail", args=[self.play.id]))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_play_list_details(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get("/api/theatre/plays/")
+        response = self.client.get(reverse("theatre:play-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get(f"/api/theatre/plays/{self.play.id}/")
+        response = self.client.get(reverse("theatre:play-detail", args=[self.play.id]))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -100,4 +98,3 @@ class PlayModelTest(TestCase):
         # Attempt to retrieve the deleted Play (should raise Play.DoesNotExist)
         with self.assertRaises(Play.DoesNotExist):
             Play.objects.get(title="Test Play")
-

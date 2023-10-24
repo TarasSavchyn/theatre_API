@@ -11,27 +11,25 @@ from user.models import User
 class ActorAccessTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(
-            email='test@test.ua',
-            password='test123'
-        )
-        self.actor = Actor.objects.create(
-            first_name='John',
-            last_name='Doe'
-        )
+        self.user = User.objects.create_user(email="test@test.ua", password="test123")
+        self.actor = Actor.objects.create(first_name="John", last_name="Doe")
 
     def test_unauthenticated_user_cannot_access_actor_list_details(self):
-        response = self.client.get("http://localhost/api/theatre/actors/")
+        response = self.client.get(reverse("theatre:actor-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        response = self.client.get(f"/api/theatre/actors/{self.actor.id}/")
+        response = self.client.get(
+            reverse("theatre:actor-detail", args=[self.actor.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_actor_list_details(self):
         self.client.force_authenticate(user=self.user)
 
-        response = self.client.get("http://localhost/api/theatre/actors/")
+        response = self.client.get(reverse("theatre:actor-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get(f"/api/theatre/actors/{self.actor.id}/")
+        response = self.client.get(
+            reverse("theatre:actor-detail", args=[self.actor.id])
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
@@ -80,6 +78,3 @@ class ActorModelTest(TestCase):
         # Check the __str__ representation of Actor
         expected_str = f"{self.actor.first_name} {self.actor.last_name}"
         self.assertEqual(str(self.actor), expected_str)
-
-
-
