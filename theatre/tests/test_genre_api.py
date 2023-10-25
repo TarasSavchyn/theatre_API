@@ -1,11 +1,50 @@
-from django.test import TestCase
-from django.urls import reverse
-from rest_framework import status
-
-from theatre.models import Genre
-from rest_framework.test import APIClient
-
 from user.models import User
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
+from rest_framework import status
+from django.urls import reverse
+from theatre.models import Genre
+from theatre.serializers import GenreSerializer
+
+GENRE_URL = reverse(
+    "theatre:genre-list"
+)  # Replace 'genre-list' with the actual URL name for listing genres.
+GENRE_DETAIL_URL = reverse(
+    "theatre:genre-detail", args=[1]
+)  # Replace 'genre-detail' with the actual URL name for retrieving genre details.
+
+
+class GenreAPITests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="test@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_list_genres(self):
+        """Test listing all genres."""
+        response = self.client.get(GENRE_URL)
+
+        genres = Genre.objects.all()
+        serializer = GenreSerializer(genres, many=True)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["results"], serializer.data)
+
+    def test_retrieve_genre_details(self):
+        """Test retrieving details of a single genre."""
+        genre = Genre.objects.create(
+            name="Drama",
+        )
+        response = self.client.get(GENRE_DETAIL_URL)
+
+        serializer = GenreSerializer(genre)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, serializer.data)
 
 
 class GenreAccessTestCase(TestCase):

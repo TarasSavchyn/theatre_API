@@ -1,10 +1,50 @@
-from django.test import TestCase
-from django.urls import reverse
-from rest_framework import status
-from rest_framework.test import APIClient
 from user.models import User
 from theatre.models import Performance, Play, TheatreHall
 from datetime import datetime
+
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from rest_framework.test import APIClient
+from rest_framework import status
+from django.urls import reverse
+from theatre.models import Performance
+
+PERFORMANCE_URL = reverse("theatre:performance-list")
+PERFORMANCE_DETAIL_URL = reverse("theatre:performance-detail", args=[1])
+
+
+class PerformanceAPITests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="test@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(self.user)
+
+        self.theatre_hall = TheatreHall.objects.create(
+            name="Test Hall", rows=10, seats_in_row=15
+        )
+        self.play = Play.objects.create(
+            title="Test Play", description="This is a test play"
+        )
+        self.performance = Performance.objects.create(
+            play=self.play, theatre_hall=self.theatre_hall, show_time="2023-10-20"
+        )
+
+    def test_list_performances(self):
+
+        response = self.client.get(PERFORMANCE_URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 1)
+
+    def test_retrieve_performance_details(self):
+
+        response = self.client.get(PERFORMANCE_DETAIL_URL)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["play"]["title"], self.play.title)
+        self.assertEqual(response.data["theatre_hall"]["name"], self.theatre_hall.name)
 
 
 class PerformanceAccessTestCase(TestCase):

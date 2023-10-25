@@ -1,12 +1,48 @@
-from django.test import TestCase
+from user.models import User
+
+
 from django.urls import reverse
-
-from theatre.models import Play, Genre, Actor
-
-
 from rest_framework import status
 from rest_framework.test import APIClient
-from user.models import User
+from django.test import TestCase
+from django.contrib.auth import get_user_model
+from theatre.models import Play, Genre, Actor
+
+PLAY_URL = reverse("theatre:play-list")
+PLAY_DETAIL_URL = reverse("theatre:play-detail", args=[1])
+
+
+class PlayAPITests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="test@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(self.user)
+
+        self.genre = Genre.objects.create(name="Test Genre")
+        self.actor = Actor.objects.create(first_name="Test", last_name="Actor")
+
+        self.play = Play.objects.create(
+            title="Test Play", description="This is a test play"
+        )
+        self.play.genres.add(self.genre)
+        self.play.actors.add(self.actor)
+
+    def test_list_plays(self):
+        response = self.client.get(PLAY_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 1)
+
+    def test_retrieve_play_details(self):
+        response = self.client.get(PLAY_DETAIL_URL)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["title"], self.play.title)
+        self.assertEqual(response.data["description"], self.play.description)
+        self.assertEqual(response.data["genres"][0]["name"], self.genre.name)
+        self.assertEqual(response.data["actors"][0]["full_name"], self.actor.full_name)
 
 
 class PlayAccessTestCase(TestCase):
@@ -18,16 +54,16 @@ class PlayAccessTestCase(TestCase):
         )
 
     def test_unauthenticated_user_cannot_access_play_list_details(self):
-        response = self.client.get(reverse("theatre:play-list"))
+        response = self.client.get(PLAY_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        response = self.client.get(reverse("theatre:play-detail", args=[self.play.id]))
+        response = self.client.get(PLAY_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_play_list_details(self):
         self.client.force_authenticate(user=self.user)
-        response = self.client.get(reverse("theatre:play-list"))
+        response = self.client.get(PLAY_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        response = self.client.get(reverse("theatre:play-detail", args=[self.play.id]))
+        response = self.client.get(PLAY_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 

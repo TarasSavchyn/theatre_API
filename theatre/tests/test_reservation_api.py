@@ -1,13 +1,71 @@
 from django.test import TestCase
-from theatre.models import Reservation
+from django.urls import reverse
+
+from theatre.models import Reservation, TheatreHall, Performance, Play
 from django.contrib.auth import get_user_model
 
+from rest_framework.test import APIClient
 
+from user.models import User
 from rest_framework.test import APITestCase
 from rest_framework import status
 
 
-User = get_user_model()
+RESERVATION_URL = reverse("theatre:reservation-list")
+
+
+class ReservationAPITests(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email="test@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(self.user)
+
+        self.theatre_hall = TheatreHall.objects.create(
+            name="Test Hall", rows=10, seats_in_row=15
+        )
+        self.play = Play.objects.create(
+            title="Test Play", description="This is a test play"
+        )
+        self.performance = Performance.objects.create(
+            play=self.play, theatre_hall=self.theatre_hall, show_time="2023-10-20"
+        )
+        self.reservation_data = {
+            "user": self.user.id,
+            "status": True,
+            "tickets": [{"row": 1, "seat": 2, "performance": self.performance.id}],
+        }
+
+    def test_create_reservation(self):
+        response = self.client.post(
+            RESERVATION_URL, self.reservation_data, format="json"
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Reservation.objects.count(), 1)
+        reservation = Reservation.objects.first()
+        self.assertEqual(reservation.status, True)
+        self.assertEqual(reservation.user, self.user)
+        self.assertEqual(reservation.tickets.count(), 1)
+
+    def test_retrieve_reservation(self):
+        response = self.client.get(RESERVATION_URL)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_cancel_reservation(self):
+        response = self.client.post(
+            RESERVATION_URL, self.reservation_data, format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        reservation_id = response.data.get("id")
+
+        response = self.client.post(
+            f"{RESERVATION_URL}{reservation_id}/cancel/", format="json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        reservation = Reservation.objects.get(id=reservation_id)
+        self.assertFalse(reservation.status)
 
 
 class ReservationAccessTestCase(APITestCase):
@@ -31,7 +89,7 @@ class ReservationAccessTestCase(APITestCase):
         self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual((response.data["count"]), 1)
+        self.assertEqual(len(response.data["results"]), 1)
 
     def test_authenticated_user_cannot_access_other_user_reservations(self):
         self.client.force_authenticate(user=self.user1)
