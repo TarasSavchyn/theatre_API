@@ -1,6 +1,5 @@
+from theatre.serializers import PlayListSerializer, PlaySerializer
 from user.models import User
-
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -12,6 +11,59 @@ PLAY_URL = reverse("theatre:play-list")
 PLAY_DETAIL_URL = reverse("theatre:play-detail", args=[1])
 
 
+class PlayFilterTests(TestCase):
+    """
+    Test filtering plays by genre and actor.
+    """
+
+    def setUp(self):
+        self.client = APIClient()
+        self.genre1 = Genre.objects.create(name="Action")
+        self.genre2 = Genre.objects.create(name="Drama")
+        self.actor1 = Actor.objects.create(first_name="John", last_name="Doe")
+        self.actor2 = Actor.objects.create(first_name="Jane", last_name="Smith")
+        self.play1 = Play.objects.create(
+            title="Play 1",
+            description="Description 1",
+        )
+        self.play1.genres.add(self.genre1)
+        self.play1.actors.add(self.actor1)
+        self.play2 = Play.objects.create(
+            title="Play 2",
+            description="Description 2",
+        )
+        self.play2.genres.add(self.genre2)
+        self.play2.actors.add(self.actor2)
+        self.user = get_user_model().objects.create_user(
+            email="testuser@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(user=self.user)
+
+    def test_filter_plays_by_genre(self):
+        """
+        Test filtering plays by genre.
+        """
+        url = f"{PLAY_URL}?genres={self.genre1.id}"
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        serializer1 = PlayListSerializer(self.play1)
+        serializer2 = PlayListSerializer(self.play2)
+        self.assertEqual(serializer1.data, res.data["results"][0])
+        self.assertNotIn(serializer2.data, res.data["results"])
+
+    def test_filter_plays_by_actor(self):
+        """
+        Test filtering plays by actor.
+        """
+        url = f"{PLAY_URL}?actors={self.actor1.id}"
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        serializer1 = PlayListSerializer(self.play1)
+        serializer2 = PlayListSerializer(self.play2)
+        self.assertEqual(serializer1.data, res.data["results"][0])
+        self.assertNotIn(serializer2.data, res.data["results"])
+
+
 class PlayAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -19,10 +71,8 @@ class PlayAPITests(TestCase):
             email="test@example.com", password="testpassword"
         )
         self.client.force_authenticate(self.user)
-
         self.genre = Genre.objects.create(name="Test Genre")
         self.actor = Actor.objects.create(first_name="Test", last_name="Actor")
-
         self.play = Play.objects.create(
             title="Test Play", description="This is a test play"
         )
@@ -30,14 +80,18 @@ class PlayAPITests(TestCase):
         self.play.actors.add(self.actor)
 
     def test_list_plays(self):
+        """
+        Test listing plays.
+        """
         response = self.client.get(PLAY_URL)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
 
     def test_retrieve_play_details(self):
+        """
+        Test retrieving play details.
+        """
         response = self.client.get(PLAY_DETAIL_URL)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["title"], self.play.title)
         self.assertEqual(response.data["description"], self.play.description)
@@ -46,6 +100,10 @@ class PlayAPITests(TestCase):
 
 
 class PlayAccessTestCase(TestCase):
+    """
+    Test access to play-related endpoints.
+    """
+
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(email="test@test.ua", password="test123")
@@ -54,12 +112,18 @@ class PlayAccessTestCase(TestCase):
         )
 
     def test_unauthenticated_user_cannot_access_play_list_details(self):
+        """
+        Test unauthenticated user's access to play list details.
+        """
         response = self.client.get(PLAY_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.get(PLAY_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_play_list_details(self):
+        """
+        Test authenticated user's access to play list details.
+        """
         self.client.force_authenticate(user=self.user)
         response = self.client.get(PLAY_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -69,68 +133,64 @@ class PlayAccessTestCase(TestCase):
 
 class PlayModelTest(TestCase):
     def setUp(self):
-        # Create test Genre and Actor objects
         genre = Genre.objects.create(name="Drama")
         actor = Actor.objects.create(first_name="John", last_name="Doe")
-
-        # Create a test Play object
         Play.objects.create(
             title="Test Play",
             description="A test play",
         )
-
-        # Add the test Genre and Actor to the Play
         play = Play.objects.get(id=1)
         play.genres.add(genre)
         play.actors.add(actor)
 
     def test_genres_relationship(self):
-        # Retrieve a Play object
+        """
+        Test the genres relationship of the Play model.
+        """
         play = Play.objects.get(id=1)
-        # Retrieve the associated genres
         associated_genres = play.genres.all()
-        # Check if the associated genres match the expected genre name
         self.assertEqual(associated_genres[0].name, "Drama")
 
     def test_actors_relationship(self):
-        # Retrieve a Play object
+        """
+        Test the actors relationship of the Play model.
+        """
         play = Play.objects.get(id=1)
-        # Retrieve the associated actors
         associated_actors = play.actors.all()
-        # Check if the associated actors match the expected actor full name
         self.assertEqual(associated_actors[0].full_name, "John Doe")
 
     def test_str_representation(self):
-        # Retrieve a Play object
+        """
+        Test the string representation of the Play model.
+        """
         play = Play.objects.get(id=1)
-        # Check if the string representation of the Play is its title
         self.assertEqual(str(play), play.title)
 
     def test_update_play(self):
-        # Retrieve a Play object
+        """
+        Test updating the Play model.
+        """
         play = Play.objects.get(id=1)
-        # Update the title and description of the Play
         play.title = "Updated Play Title"
         play.description = "Updated play description."
         play.save()
-        # Retrieve the updated Play
         updated_play = Play.objects.get(id=play.id)
-        # Check if the title and description have been successfully updated
         self.assertEqual(updated_play.title, "Updated Play Title")
         self.assertEqual(updated_play.description, "Updated play description.")
 
     def test_read_play(self):
-        # Retrieve an existing Play object
+        """
+        Test reading an existing Play object.
+        """
         play = Play.objects.get(title="Test Play")
-        # Ensure that the title and description of the retrieved play match the expected values
         self.assertEqual(play.title, "Test Play")
         self.assertEqual(play.description, "A test play")
 
     def test_delete_play(self):
-        # Retrieve a Play object
+        """
+        Test deleting a Play object.
+        """
         play = Play.objects.get(title="Test Play")
-        # Delete the Play
         play.delete()
-        # Attempt to retrieve the deleted Play (should raise Play.DoesNotExist)
         with self.assertRaises(Play.DoesNotExist):
             Play.objects.get(title="Test Play")

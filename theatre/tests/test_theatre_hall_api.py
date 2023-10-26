@@ -1,3 +1,4 @@
+from theatre.serializers import TheatreHallSerializer
 from user.models import User
 from django.urls import reverse
 from rest_framework import status
@@ -8,6 +9,35 @@ from theatre.models import TheatreHall
 
 THEATREHALL_URL = reverse("theatre:theatrehall-list")
 THEATREHALL_DETAIL_URL = reverse("theatre:theatrehall-detail", args=[1])
+
+
+class TheatreHallFilterTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="testuser@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(user=self.user)
+
+        self.hall1 = TheatreHall.objects.create(name="Hall 1", rows=2, seats_in_row=2)
+        self.hall2 = TheatreHall.objects.create(name="Hall 2", rows=2, seats_in_row=2)
+        self.hall3 = TheatreHall.objects.create(
+            name="Small Hall", rows=2, seats_in_row=2
+        )
+
+    def test_filter_halls_by_name(self):
+        """
+        Test filtering theatre halls by name.
+        """
+        url = f"{THEATREHALL_URL}?name=Hall 1"
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        serializer1 = TheatreHallSerializer(self.hall1)
+        serializer2 = TheatreHallSerializer(self.hall2)
+        serializer3 = TheatreHallSerializer(self.hall3)
+        self.assertEqual(serializer1.data, res.data["results"][0])
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertNotIn(serializer3.data, res.data["results"])
 
 
 class TheatreHallAPITests(TestCase):
@@ -23,17 +53,24 @@ class TheatreHallAPITests(TestCase):
         )
 
     def test_list_theatrehalls(self):
+        """
+        Test getting a list of theatre halls.
+        """
         response = self.client.get(THEATREHALL_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data["results"]), 1)
 
     def test_retrieve_theatrehall_details(self):
+        """
+        Test retrieving details of a theatre hall.
+        """
         response = self.client.get(THEATREHALL_DETAIL_URL)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], self.theatre_hall.name)
         self.assertEqual(response.data["rows"], self.theatre_hall.rows)
+        self.assertEqual(response.data["seats_in_row"], self.theatre_hall.seats_in_row)
         self.assertEqual(response.data["seats_in_row"], self.theatre_hall.seats_in_row)
 
 
@@ -46,12 +83,18 @@ class TheatreHallAccessTestCase(TestCase):
         )
 
     def test_unauthenticated_user_cannot_access_theatrehall_list_details(self):
+        """
+        Test that unauthenticated users cannot access the list and details of theatre halls.
+        """
         response = self.client.get(THEATREHALL_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.get(THEATREHALL_DETAIL_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_theatrehall_list_details(self):
+        """
+        Test that authenticated users can access the list and details of theatre halls.
+        """
         self.client.force_authenticate(user=self.user)
         response = self.client.get(THEATREHALL_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -61,50 +104,53 @@ class TheatreHallAccessTestCase(TestCase):
 
 class TheatreHallModelTest(TestCase):
     def setUp(self):
-        # Create a test TheatreHall object
+        """
+        Set up a test TheatreHall object.
+        """
         TheatreHall.objects.create(name="Test Hall", rows=10, seats_in_row=15)
 
     def test_capacity_calculation(self):
-        # Retrieve a TheatreHall object
+        """
+        Test the calculation of the capacity.
+        """
         hall = TheatreHall.objects.get(id=1)
-        # Calculate the expected capacity based on rows and seats_in_row
         expected_capacity = hall.rows * hall.seats_in_row
-        # Check if the calculated capacity matches the expected value
         self.assertEqual(hall.capacity, expected_capacity)
 
     def test_read_theatre_hall(self):
-        # Retrieve an existing TheatreHall object
+        """
+        Test reading a Theatre Hall.
+        """
         hall = TheatreHall.objects.get(name="Test Hall")
-        # Ensure that the name, rows, and seats_in_row of the retrieved hall match the expected values
         self.assertEqual(hall.name, "Test Hall")
         self.assertEqual(hall.rows, 10)
         self.assertEqual(hall.seats_in_row, 15)
 
     def test_update_theatre_hall(self):
-        # Retrieve a TheatreHall with the name 'Test Hall'
+        """
+        Test updating a Theatre Hall.
+        """
         hall = TheatreHall.objects.get(name="Test Hall")
-        # Update the name and seats_in_row of the hall
         hall.name = "Updated Hall"
         hall.seats_in_row = 20
         hall.save()
-        # Retrieve the updated TheatreHall
         updated_hall = TheatreHall.objects.get(id=hall.id)
-        # Check if the name and seats_in_row have been successfully updated
         self.assertEqual(updated_hall.name, "Updated Hall")
         self.assertEqual(updated_hall.seats_in_row, 20)
 
     def test_delete_theatre_hall(self):
-        # Retrieve a TheatreHall with the name 'Test Hall'
+        """
+        Test deleting a Theatre Hall.
+        """
         hall = TheatreHall.objects.get(name="Test Hall")
-        # Delete the TheatreHall
         hall.delete()
-        # Attempt to retrieve the deleted TheatreHall (should raise TheatreHall.DoesNotExist)
         with self.assertRaises(TheatreHall.DoesNotExist):
             TheatreHall.objects.get(name="Test Hall")
 
     def test_str_representation(self):
-        # Retrieve a TheatreHall object
+        """
+        Test the string representation of a TheatreHall object.
+        """
         hall = TheatreHall.objects.get(name="Test Hall")
-        # Expect that the string representation (__str__) of the object would be 'Test Hall'
         expected_str = "Test Hall"
         self.assertEqual(str(hall), expected_str)

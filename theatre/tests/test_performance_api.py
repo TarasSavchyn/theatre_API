@@ -1,5 +1,6 @@
+from theatre.serializers import PerformanceListSerializer
 from user.models import User
-from theatre.models import Performance, Play, TheatreHall
+from theatre.models import Play, TheatreHall
 from datetime import datetime
 
 from django.test import TestCase
@@ -13,8 +14,59 @@ PERFORMANCE_URL = reverse("theatre:performance-list")
 PERFORMANCE_DETAIL_URL = reverse("theatre:performance-detail", args=[1])
 
 
+class PerformanceFilterTests(TestCase):
+    def setUp(self):
+        """
+        Set up the test environment and create sample data for performance filtering tests.
+        """
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email="testuser@example.com", password="testpassword"
+        )
+        self.client.force_authenticate(user=self.user)
+
+        self.theatre_hall = TheatreHall.objects.create(
+            name="Main Hall", rows=10, seats_in_row=15
+        )
+        self.play1 = Play.objects.create(title="Play 1", description="Description 1")
+        self.play2 = Play.objects.create(title="Play 2", description="Description 2")
+
+        self.performance1 = Performance.objects.create(
+            play=self.play1,
+            theatre_hall=self.theatre_hall,
+            show_time=datetime(2023, 10, 28),
+        )
+        self.performance2 = Performance.objects.create(
+            play=self.play1,
+            theatre_hall=self.theatre_hall,
+            show_time=datetime(2023, 10, 30),
+        )
+        self.performance3 = Performance.objects.create(
+            play=self.play2,
+            theatre_hall=self.theatre_hall,
+            show_time=datetime(2023, 11, 1),
+        )
+
+    def test_filter_performances_by_date(self):
+        """
+        Test filtering performances by date.
+        """
+        url = f"{PERFORMANCE_URL}?date=2023-10-30"
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        serializer1 = PerformanceListSerializer(self.performance2)
+        serializer2 = PerformanceListSerializer(self.performance1)
+        serializer3 = PerformanceListSerializer(self.performance3)
+        self.assertIn(serializer1.data, res.data["results"])
+        self.assertNotIn(serializer2.data, res.data["results"])
+        self.assertNotIn(serializer3.data, res.data["results"])
+
+
 class PerformanceAPITests(TestCase):
     def setUp(self):
+        """
+        Set up the test environment and create sample data for performance API tests.
+        """
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
             email="test@example.com", password="testpassword"
@@ -32,16 +84,18 @@ class PerformanceAPITests(TestCase):
         )
 
     def test_list_performances(self):
-
+        """
+        Test listing all performances.
+        """
         response = self.client.get(PERFORMANCE_URL)
-
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data["results"]), 1)
 
     def test_retrieve_performance_details(self):
-
+        """
+        Test retrieving details of a single performance.
+        """
         response = self.client.get(PERFORMANCE_DETAIL_URL)
-
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["play"]["title"], self.play.title)
         self.assertEqual(response.data["theatre_hall"]["name"], self.theatre_hall.name)
@@ -49,6 +103,9 @@ class PerformanceAPITests(TestCase):
 
 class PerformanceAccessTestCase(TestCase):
     def setUp(self):
+        """
+        Set up the test environment and create sample data for performance access tests.
+        """
         self.client = APIClient()
         self.user = User.objects.create_user(email="test@test.ua", password="test123")
         self.theatre_hall = TheatreHall.objects.create(
@@ -62,6 +119,9 @@ class PerformanceAccessTestCase(TestCase):
         )
 
     def test_unauthenticated_user_cannot_access_performance_list_details(self):
+        """
+        Test that unauthenticated users cannot access performance list and details.
+        """
         response = self.client.get(reverse("theatre:performance-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         response = self.client.get(
@@ -70,6 +130,9 @@ class PerformanceAccessTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_authenticated_user_can_access_performance_list_details(self):
+        """
+        Test that authenticated users can access performance list and details.
+        """
         self.client.force_authenticate(user=self.user)
         response = self.client.get(reverse("theatre:performance-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -81,61 +144,65 @@ class PerformanceAccessTestCase(TestCase):
 
 class PerformanceModelTest(TestCase):
     def setUp(self):
-        # Create test Play and TheatreHall objects
+        """
+        Set up the test environment and create a test performance object.
+        """
         play = Play.objects.create(title="Test Play", description="A test play")
         theatre_hall = TheatreHall.objects.create(
             name="Main Hall", rows=10, seats_in_row=12
         )
 
-        # Create a test Performance object
         self.performance = Performance.objects.create(
             play=play, theatre_hall=theatre_hall, show_time=datetime.now()
         )
 
     def test_str_representation(self):
-        # Check the __str__ representation of Performance
+        """
+        Test the string representation of a performance.
+        """
         expected_str = f"{self.performance.play.title} at {self.performance.theatre_hall.name}, {self.performance.show_time}"
         self.assertEqual(str(self.performance), expected_str)
 
     def test_available_tickets(self):
-        # Calculate the total capacity of the TheatreHall
+        """
+        Test the available_tickets property of a performance.
+        """
         total_capacity = (
             self.performance.theatre_hall.rows
             * self.performance.theatre_hall.seats_in_row
         )
 
-        # Check the available_tickets property
         self.assertEqual(self.performance.available_tickets, total_capacity)
 
     def test_update_performance(self):
-        # Retrieve a Performance object
+        """
+        Test updating a performance's theatre hall.
+        """
         performance = Performance.objects.get(id=self.performance.id)
 
-        # Create a new TheatreHall for the update
         new_theatre_hall = TheatreHall.objects.create(
             name="Updated Hall", rows=8, seats_in_row=14
         )
 
-        # Update the Performance with the new TheatreHall
         performance.theatre_hall = new_theatre_hall
         performance.save()
 
-        # Retrieve the updated Performance
         updated_performance = Performance.objects.get(id=performance.id)
 
-        # Check if the TheatreHall has been successfully updated
         self.assertEqual(updated_performance.theatre_hall.name, "Updated Hall")
 
     def test_read_performance(self):
-        # Retrieve an existing Performance object
+        """
+        Test reading a performance and its associated play and theatre hall.
+        """
         performance = Performance.objects.get(id=self.performance.id)
-        # Ensure that the associated Play and TheatreHall match the expected values
         self.assertEqual(performance.play.title, "Test Play")
         self.assertEqual(performance.theatre_hall.name, "Main Hall")
 
     def test_delete_performance(self):
-        # Delete the Performance
+        """
+        Test deleting a performance.
+        """
         self.performance.delete()
-        # Attempt to retrieve the deleted Performance (should raise Performance.DoesNotExist)
         with self.assertRaises(Performance.DoesNotExist):
             Performance.objects.get(id=self.performance.id)
