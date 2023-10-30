@@ -6,7 +6,7 @@ from django.db.models import Q
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from rest_framework.exceptions import ParseError
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -27,7 +27,11 @@ from .serializers import (
 )
 
 
-class PlayViewSet(viewsets.ModelViewSet):
+class PlayViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Play.objects.all()
 
     def get_queryset(self):
@@ -113,7 +117,11 @@ class PlayViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
@@ -142,7 +150,11 @@ class GenreViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class ActorViewSet(viewsets.ModelViewSet):
+class ActorViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
 
@@ -206,7 +218,11 @@ class ActorViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class TheatreHallViewSet(viewsets.ModelViewSet):
+class TheatreHallViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = TheatreHall.objects.all()
     serializer_class = TheatreHallSerializer
 
@@ -235,7 +251,11 @@ class TheatreHallViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class PerformanceViewSet(viewsets.ModelViewSet):
+class PerformanceViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Performance.objects.all()
     serializer_class = PerformanceSerializer
 

@@ -1,17 +1,12 @@
-from django.urls import reverse
-from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-class AuthenticationTests(TestCase):
+
+class JWTAuthenticationTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user_data = {
@@ -64,7 +59,7 @@ class AuthenticationTests(TestCase):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-class UserTests(TestCase):
+class TokenAuthenticationTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user_data = {
