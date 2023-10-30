@@ -5,7 +5,6 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Avg
 from django.utils.text import slugify
-from rest_framework.exceptions import ValidationError
 
 
 class Genre(models.Model):

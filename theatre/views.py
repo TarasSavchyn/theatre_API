@@ -2,7 +2,7 @@ from datetime import date
 
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
-from django.db.models import Q, Avg
+from django.db.models import Q
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 
 from rest_framework.exceptions import ParseError
@@ -77,9 +77,7 @@ class PlayViewSet(viewsets.ModelViewSet):
     )
     def evaluate(self, request, pk=None):
         play = self.get_object()
-
-        # Check if the user has already rated the play
-        user = request.user  # Assuming you have authentication and the user object in the request
+        user = request.user
         existing_rating = Rating.objects.filter(play=play, user=user).first()
 
         if existing_rating:
