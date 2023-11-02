@@ -153,6 +153,7 @@ class GenreViewSet(
 class ActorViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
     viewsets.GenericViewSet,
 ):
     queryset = Actor.objects.all()
