@@ -1,4 +1,5 @@
 # API_Theatre
+https://github.com/TarasSavchyn/theatre_API
 
 ![img.png](scheme/img.png)
 
@@ -21,6 +22,7 @@ seats and their status.
 - Automatic Rating Update: Show ratings are automatically updated based on user feedback.
 
 Our system helps theaters manage their activities efficiently, attract new audiences and provide a convenient way to reserve tickets. .
+
 
 ## Content
 - [technology](#technology)
@@ -134,4 +136,4 @@ $ python3 manage.py test
 
 ## Project developer
 
-- [Taras Savchyn](https://www.linkedin.com/in/%D1%82%D0%B0%D1%80%D0%B0%D1%81-%D1%81%D0%B0%D0%B2%D1%87%D0%B8%D0%BD-ba2705261/) — Python Developer
+- [Taras Savchyn](https://www.linkedin.com/in/taras-savchyn-ba2705261/) — Python Developer
