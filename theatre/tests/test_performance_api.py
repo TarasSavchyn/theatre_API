@@ -17,7 +17,8 @@ PERFORMANCE_DETAIL_URL = reverse("theatre:performance-detail", args=[1])
 class PerformanceFilterTests(TestCase):
     def setUp(self):
         """
-        Set up the test environment and create sample data for performance filtering tests.
+        Set up the test environment and create sample data
+        for performance filtering tests.
         """
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -28,8 +29,14 @@ class PerformanceFilterTests(TestCase):
         self.theatre_hall = TheatreHall.objects.create(
             name="Main Hall", rows=10, seats_in_row=15
         )
-        self.play1 = Play.objects.create(title="Play 1", description="Description 1")
-        self.play2 = Play.objects.create(title="Play 2", description="Description 2")
+        self.play1 = Play.objects.create(
+            title="Play 1",
+            description="Description 1"
+        )
+        self.play2 = Play.objects.create(
+            title="Play 2",
+            description="Description 2"
+        )
 
         self.performance1 = Performance.objects.create(
             play=self.play1,
@@ -65,7 +72,8 @@ class PerformanceFilterTests(TestCase):
 class PerformanceAPITests(TestCase):
     def setUp(self):
         """
-        Set up the test environment and create sample data for performance API tests.
+        Set up the test environment and create sample data
+        for performance API tests.
         """
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -80,7 +88,9 @@ class PerformanceAPITests(TestCase):
             title="Test Play", description="This is a test play"
         )
         self.performance = Performance.objects.create(
-            play=self.play, theatre_hall=self.theatre_hall, show_time="2023-10-20"
+            play=self.play,
+            theatre_hall=self.theatre_hall,
+            show_time="2023-10-20"
         )
 
     def test_list_performances(self):
@@ -98,16 +108,23 @@ class PerformanceAPITests(TestCase):
         response = self.client.get(PERFORMANCE_DETAIL_URL)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["play"]["title"], self.play.title)
-        self.assertEqual(response.data["theatre_hall"]["name"], self.theatre_hall.name)
+        self.assertEqual(
+            response.data["theatre_hall"]["name"],
+            self.theatre_hall.name
+        )
 
 
 class PerformanceAccessTestCase(TestCase):
     def setUp(self):
         """
-        Set up the test environment and create sample data for performance access tests.
+        Set up the test environment and create sample data
+        for performance access tests.
         """
         self.client = APIClient()
-        self.user = User.objects.create_user(email="test@test.ua", password="test123")
+        self.user = User.objects.create_user(
+            email="test@test.ua",
+            password="test123"
+        )
         self.theatre_hall = TheatreHall.objects.create(
             name="Test Hall", rows=10, seats_in_row=10
         )
@@ -115,12 +132,15 @@ class PerformanceAccessTestCase(TestCase):
             title="Test Play", description="Description of the test play"
         )
         self.performance = Performance.objects.create(
-            play=self.play, theatre_hall=self.theatre_hall, show_time=datetime.now()
+            play=self.play,
+            theatre_hall=self.theatre_hall,
+            show_time=datetime.now()
         )
 
     def test_unauthenticated_user_cannot_access_performance_list_details(self):
         """
-        Test that unauthenticated users cannot access performance list and details.
+        Test that unauthenticated users cannot access
+        performance list and details.
         """
         response = self.client.get(reverse("theatre:performance-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -147,7 +167,10 @@ class PerformanceModelTest(TestCase):
         """
         Set up the test environment and create a test performance object.
         """
-        play = Play.objects.create(title="Test Play", description="A test play")
+        play = Play.objects.create(
+            title="Test Play",
+            description="A test play"
+        )
         theatre_hall = TheatreHall.objects.create(
             name="Main Hall", rows=10, seats_in_row=12
         )
@@ -160,7 +183,11 @@ class PerformanceModelTest(TestCase):
         """
         Test the string representation of a performance.
         """
-        expected_str = f"{self.performance.play.title} at {self.performance.theatre_hall.name}, {self.performance.show_time}"
+        expected_str = (
+            f"{self.performance.play.title} at "
+            f"{self.performance.theatre_hall.name}, "
+            f"{self.performance.show_time}"
+        )
         self.assertEqual(str(self.performance), expected_str)
 
     def test_available_tickets(self):

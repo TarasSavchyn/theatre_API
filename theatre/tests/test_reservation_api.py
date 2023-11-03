@@ -23,12 +23,16 @@ class ReservationAPITests(APITestCase):
             title="Test Play", description="This is a test play"
         )
         self.performance = Performance.objects.create(
-            play=self.play, theatre_hall=self.theatre_hall, show_time="2023-10-20"
+            play=self.play,
+            theatre_hall=self.theatre_hall,
+            show_time="2023-10-20"
         )
         self.reservation_data = {
             "user": self.user.id,
             "status": True,
-            "tickets": [{"row": 1, "seat": 2, "performance": self.performance.id}],
+            "tickets": [
+                {"row": 1, "seat": 2, "performance": self.performance.id}
+            ],
         }
 
     def test_create_reservation(self):
@@ -73,8 +77,14 @@ class ReservationAPITests(APITestCase):
 
 class ReservationAccessTestCase(APITestCase):
     def setUp(self):
-        self.user1 = User.objects.create_user(email="user1@test.ua", password="test123")
-        self.user2 = User.objects.create_user(email="user2@test.ua", password="test123")
+        self.user1 = User.objects.create_user(
+            email="user1@test.ua",
+            password="test123"
+        )
+        self.user2 = User.objects.create_user(
+            email="user2@test.ua",
+            password="test123"
+        )
         self.reservation_user1 = Reservation.objects.create(
             user=self.user1, status=True
         )
@@ -102,7 +112,8 @@ class ReservationAccessTestCase(APITestCase):
 
     def test_authenticated_user_cannot_access_other_user_reservations(self):
         """
-        Test that authenticated users cannot access reservations of other users.
+        Test that authenticated users cannot access reservations
+        of other users.
         """
         self.client.force_authenticate(user=self.user1)
         response = self.client.get(
@@ -124,7 +135,8 @@ class ReservationAccessTestCase(APITestCase):
 
     def test_authenticated_user_cannot_cancel_other_users_reservation(self):
         """
-        Test that authenticated users cannot cancel reservations of other users.
+        Test that authenticated users cannot cancel reservations
+        of other users.
         """
         self.client.force_authenticate(user=self.user1)
         response = self.client.post(
@@ -137,7 +149,9 @@ class ReservationAccessTestCase(APITestCase):
 
 class ReservationModelTest(TestCase):
     def setUp(self):
-        self.user = get_user_model().objects.create_user("test@test.ua", "test123")
+        self.user = get_user_model().objects.create_user(
+            "test@test.ua", "test123"
+        )
         self.reservation = Reservation.objects.create(user=self.user)
 
     def test_update_reservation(self):
@@ -168,5 +182,7 @@ class ReservationModelTest(TestCase):
         """
         Test the string representation of a reservation.
         """
-        expected_str = f"Reservation by {self.user.first_name} {self.user.last_name}"
+        expected_str = (
+            f"Reservation by {self.user.first_name} {self.user.last_name}"
+        )
         self.assertEqual(str(self.reservation), expected_str)

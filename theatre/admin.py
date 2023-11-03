@@ -7,7 +7,8 @@ from theatre.models import (
     Ticket,
     TheatreHall,
     Play,
-    Reservation, Rating,
+    Reservation,
+    Rating,
 )
 
 
@@ -29,14 +30,16 @@ admin.site.register(Ticket)
 
 
 class PlayAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'average_rating')
+    list_display = ("title", "description", "average_rating")
 
-    readonly_fields = ('average_rating',)  # Make the 'average_rating' field read-only
+    readonly_fields = ("average_rating",)
+
 
 admin.site.register(Play, PlayAdmin)
 
 
 class RatingAdmin(admin.ModelAdmin):
     readonly_fields = ("user", "play", "mark")
+
 
 admin.site.register(Rating, RatingAdmin)

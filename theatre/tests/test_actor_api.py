@@ -26,9 +26,18 @@ class ActorFilterTests(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-        self.actor1 = Actor.objects.create(first_name="John", last_name="Doe")
-        self.actor2 = Actor.objects.create(first_name="Jane", last_name="Smith")
-        self.actor3 = Actor.objects.create(first_name="Alice", last_name="Johnson")
+        self.actor1 = Actor.objects.create(
+            first_name="John",
+            last_name="Doe"
+        )
+        self.actor2 = Actor.objects.create(
+            first_name="Jane",
+            last_name="Smith"
+        )
+        self.actor3 = Actor.objects.create(
+            first_name="Alice",
+            last_name="Johnson"
+        )
 
     def test_filter_actors_by_first_name_or_last_name(self):
         """
@@ -127,7 +136,11 @@ class ActorImageUploadTests(TestCase):
             img = Image.new("RGB", (10, 10))
             img.save(ntf, format="JPEG")
             ntf.seek(0)
-            self.client.post(url, {"foto": ntf}, format="multipart")
+            self.client.post(
+                url,
+                {"foto": ntf},
+                format="multipart"
+            )
 
         res = self.client.get(ACTOR_DETAIL_URL)
         self.assertIn("foto", res.data)
@@ -139,12 +152,19 @@ class ActorImageUploadTests(TestCase):
 class ActorAccessTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(email="test@test.ua", password="test123")
-        self.actor = Actor.objects.create(first_name="John", last_name="Doe")
+        self.user = User.objects.create_user(
+            email="test@test.ua",
+            password="test123"
+        )
+        self.actor = Actor.objects.create(
+            first_name="John",
+            last_name="Doe"
+        )
 
     def test_unauthenticated_user_cannot_access_actor_list_details(self):
         """
-        Test that an unauthenticated user cannot access the list of actors and actor details.
+        Test that an unauthenticated user cannot access the list
+        of actors and actor details.
         """
         response = self.client.get(reverse("theatre:actor-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -153,7 +173,8 @@ class ActorAccessTestCase(TestCase):
 
     def test_authenticated_user_can_access_actor_list_details(self):
         """
-        Test that an authenticated user can access the list of actors and actor details.
+        Test that an authenticated user can access the list
+        of actors and actor details.
         """
         self.client.force_authenticate(user=self.user)
         response = self.client.get(reverse("theatre:actor-list"))

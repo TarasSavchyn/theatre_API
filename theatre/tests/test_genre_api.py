@@ -76,12 +76,16 @@ class GenreAPITests(TestCase):
 class GenreAccessTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(email="test@test.ua", password="test123")
+        self.user = User.objects.create_user(
+            email="test@test.ua",
+            password="test123"
+        )
         self.genre = Genre.objects.create(name="Drama")
 
     def test_unauthenticated_user_cannot_access_genre_list_details(self):
         """
-        Test that an unauthenticated user cannot access the list of genres and genre details.
+        Test that an unauthenticated user cannot access the list
+        of genres and genre details.
         """
         response = self.client.get(reverse("theatre:genre-list"))
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -90,7 +94,8 @@ class GenreAccessTestCase(TestCase):
 
     def test_authenticated_user_can_access_genre_list_details(self):
         """
-        Test that an authenticated user can access the list of genres and genre details.
+        Test that an authenticated user can access the list
+        of genres and genre details.
         """
         self.client.force_authenticate(user=self.user)
         response = self.client.get(reverse("theatre:genre-list"))
@@ -108,9 +113,7 @@ class GenreModelTest(TestCase):
         """
         Test that genre names are unique and cannot be duplicated.
         """
-        # Try to create a Genre with a name that already exists in the database
         duplicate_genre = Genre(name="test")
-        # Ensure that an Exception is raised when attempting to save the duplicate
         with self.assertRaises(Exception):
             duplicate_genre.save()
 

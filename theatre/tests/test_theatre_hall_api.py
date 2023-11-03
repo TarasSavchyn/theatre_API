@@ -15,12 +15,21 @@ class TheatreHallFilterTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="testuser@example.com", password="testpassword"
+            email="testuser@example.com",
+            password="testpassword"
         )
         self.client.force_authenticate(user=self.user)
 
-        self.hall1 = TheatreHall.objects.create(name="Hall 1", rows=2, seats_in_row=2)
-        self.hall2 = TheatreHall.objects.create(name="Hall 2", rows=2, seats_in_row=2)
+        self.hall1 = TheatreHall.objects.create(
+            name="Hall 1",
+            rows=2,
+            seats_in_row=2
+        )
+        self.hall2 = TheatreHall.objects.create(
+            name="Hall 2",
+            rows=2,
+            seats_in_row=2
+        )
         self.hall3 = TheatreHall.objects.create(
             name="Small Hall", rows=2, seats_in_row=2
         )
@@ -70,21 +79,29 @@ class TheatreHallAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], self.theatre_hall.name)
         self.assertEqual(response.data["rows"], self.theatre_hall.rows)
-        self.assertEqual(response.data["seats_in_row"], self.theatre_hall.seats_in_row)
-        self.assertEqual(response.data["seats_in_row"], self.theatre_hall.seats_in_row)
+        self.assertEqual(
+            response.data["seats_in_row"], self.theatre_hall.seats_in_row
+        )
+        self.assertEqual(
+            response.data["seats_in_row"], self.theatre_hall.seats_in_row
+        )
 
 
 class TheatreHallAccessTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(email="test@test.ua", password="test123")
+        self.user = User.objects.create_user(
+            email="test@test.ua",
+            password="test123"
+        )
         self.theatre_hall = TheatreHall.objects.create(
             name="Test Hall", rows=10, seats_in_row=10
         )
 
     def test_unauthenticated_user_cannot_access_theatrehall_list_details(self):
         """
-        Test that unauthenticated users cannot access the list and details of theatre halls.
+        Test that unauthenticated users cannot access the list and details
+        of theatre halls.
         """
         response = self.client.get(THEATREHALL_URL)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -93,7 +110,8 @@ class TheatreHallAccessTestCase(TestCase):
 
     def test_authenticated_user_can_access_theatrehall_list_details(self):
         """
-        Test that authenticated users can access the list and details of theatre halls.
+        Test that authenticated users can access the list and details
+        of theatre halls.
         """
         self.client.force_authenticate(user=self.user)
         response = self.client.get(THEATREHALL_URL)

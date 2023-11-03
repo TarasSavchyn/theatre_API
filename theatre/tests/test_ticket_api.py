@@ -6,17 +6,28 @@ from datetime import datetime
 
 class TicketModelTest(TestCase):
     def setUp(self):
-        self.user = get_user_model().objects.create_user("test@test.ua", "test123")
-        self.play = Play.objects.create(title="Test Play", description="A test play")
+        self.user = get_user_model().objects.create_user(
+            "test@test.ua",
+            "test123"
+        )
+        self.play = Play.objects.create(
+            title="Test Play",
+            description="A test play"
+        )
         self.theatre_hall = TheatreHall.objects.create(
             name="Main Hall", rows=10, seats_in_row=12
         )
         self.performance = Performance.objects.create(
-            play=self.play, theatre_hall=self.theatre_hall, show_time=datetime.now()
+            play=self.play,
+            theatre_hall=self.theatre_hall,
+            show_time=datetime.now()
         )
         self.reservation = Reservation.objects.create(user=self.user)
         self.ticket = Ticket.objects.create(
-            reservation=self.reservation, performance=self.performance, seat=1, row=1
+            reservation=self.reservation,
+            performance=self.performance,
+            seat=1,
+            row=1
         )
 
     def test_read_ticket(self):
@@ -53,5 +64,8 @@ class TicketModelTest(TestCase):
         """
         Test the string representation of a Ticket.
         """
-        expected_str = f"Ticket for {self.performance.play.title}, Row {self.ticket.row}, Seat {self.ticket.seat}"
+        expected_str = (
+            f"Ticket for {self.performance.play.title}, "
+            f"Row {self.ticket.row}, "
+            f"Seat {self.ticket.seat}")
         self.assertEqual(str(self.ticket), expected_str)

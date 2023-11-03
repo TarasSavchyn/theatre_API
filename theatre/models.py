@@ -29,7 +29,11 @@ def actor_foto_file_path(instance, filename):
 class Actor(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    foto = models.ImageField(upload_to=actor_foto_file_path, null=True, blank=True)
+    foto = models.ImageField(
+        upload_to=actor_foto_file_path,
+        null=True,
+        blank=True
+    )
 
     @property
     def full_name(self):
@@ -48,12 +52,19 @@ class Play(models.Model):
     genres = models.ManyToManyField(Genre)
     actors = models.ManyToManyField(Actor)
 
-    average_rating = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-
+    average_rating = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True
+    )
 
     def update_average_rating(self):
-        average = Rating.objects.filter(play=self).aggregate(Avg('mark'))['mark__avg']
-        self.average_rating = round(average, 2) if average is not None else None
+        average = Rating.objects.filter(
+            play=self
+        ).aggregate(
+            Avg("mark")
+        )["mark__avg"]
+        self.average_rating = round(
+            average, 2
+        ) if average is not None else None
         self.save()
 
     def __str__(self):
@@ -90,12 +101,17 @@ class Performance(models.Model):
 
     @property
     def available_tickets(self):
-        reserved_tickets = self.ticket_set.filter(reservation__status=True).count()
+        reserved_tickets = self.ticket_set.filter(
+            reservation__status=True
+        ).count()
         total_tickets = self.theatre_hall.capacity
         return total_tickets - reserved_tickets
 
     def __str__(self):
-        return f"{self.play.title} at {self.theatre_hall.name}, {self.show_time}"
+        return (
+            f"{self.play.title} at "
+            f"{self.theatre_hall.name}, {self.show_time}"
+        )
 
     class Meta:
         ordering = [
@@ -105,7 +121,10 @@ class Performance(models.Model):
 
 class Reservation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
     status = models.BooleanField(default=True)
 
     class Meta:
@@ -130,7 +149,10 @@ class Ticket(models.Model):
     )
 
     def __str__(self):
-        return f"Ticket for {self.performance.play.title}, Row {self.row}, Seat {self.seat}"
+        return (
+            f"Ticket for {self.performance.play.title}, "
+            f"Row {self.row}, "
+            f"Seat {self.seat}")
 
     class Meta:
         ordering = ["row", "seat"]
@@ -139,10 +161,13 @@ class Ticket(models.Model):
 class Rating(models.Model):
     play = models.ForeignKey(Play, on_delete=models.CASCADE)
     mark = models.DecimalField(max_digits=5, decimal_places=2)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
     def __str__(self):
         return f"Rating for {self.play.title}: {self.mark}"
-
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -150,6 +175,3 @@ class Rating(models.Model):
 
     class Meta:
         unique_together = ["play", "user"]
-
-
-

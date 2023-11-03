@@ -12,8 +12,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
+dotenv.load_dotenv()
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-c^kk18-r78x$x=ye(a-t=m6vt)yaeq#d7r^bsrxnpenqlwj9nq"
+
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -81,16 +83,14 @@ DATABASES = {
     }
 }
 
-dotenv.load_dotenv()
-
 DATABASES["default"].update(
     {
-        'ENGINE': os.getenv("POSTGRES_ENGINE"),
-        'NAME': os.getenv("POSTGRES_NAME"),
-        'USER': os.getenv("POSTGRES_USER"),
-        'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
-        'HOST': os.getenv("POSTGRES_HOST"),
-        'PORT': os.getenv("POSTGRES_PORT")
+        "ENGINE": os.getenv("POSTGRES_ENGINE"),
+        "NAME": os.getenv("POSTGRES_NAME"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT")
     }
 )
 
@@ -99,16 +99,20 @@ DATABASES["default"].update(
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation."
+                "UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": "django.contrib.auth.password_validation."
+                "MinimumLengthValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation."
+                "CommonPasswordValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": "django.contrib.auth.password_validation."
+                "NumericPasswordValidator",
     },
 ]
 
@@ -147,8 +151,9 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.TokenAuthentication"
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination."
+                                "PageNumberPagination",
+    "PAGE_SIZE": 10,
 
     "DEFAULT_PERMISSION_CLASSES": [
        "theatre.permissions.IsAdminOrIfAuthenticatedReadOnly",
@@ -165,7 +170,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-	"ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-	"REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-	"ROTATE_REFRESH_TOKENS": True
-}
+        "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+        "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+        "ROTATE_REFRESH_TOKENS": True
+    }

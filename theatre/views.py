@@ -10,7 +10,15 @@ from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Play, Genre, Actor, TheatreHall, Performance, Reservation, Ticket, Rating
+from .models import (
+    Play,
+    Genre,
+    Actor,
+    TheatreHall,
+    Performance,
+    Reservation,
+    Rating,
+)
 from .serializers import (
     PlaySerializer,
     GenreSerializer,
@@ -23,7 +31,11 @@ from .serializers import (
     PlayListSerializer,
     PlayDetailSerializer,
     ReservationListSerializer,
-    ReservationDetailSerializer, ActorFotoSerializer, ActorListSerializer, ActorDetailSerializer, SetRatingSerializer,
+    ReservationDetailSerializer,
+    ActorFotoSerializer,
+    ActorListSerializer,
+    ActorDetailSerializer,
+    SetRatingSerializer,
 )
 
 
@@ -69,15 +81,14 @@ class PlayViewSet(
 
         return PlaySerializer
 
-
-
-
     @action(
         detail=True,
-        methods=['POST'],
+        methods=["POST"],
         serializer_class=SetRatingSerializer,
         url_path="evaluate",
-        permission_classes=[IsAuthenticated, ]
+        permission_classes=[
+            IsAuthenticated,
+        ],
     )
     def evaluate(self, request, pk=None):
         play = self.get_object()
@@ -85,30 +96,32 @@ class PlayViewSet(
         existing_rating = Rating.objects.filter(play=play, user=user).first()
 
         if existing_rating:
-            existing_rating.mark = request.data['mark']
+            existing_rating.mark = request.data["mark"]
             existing_rating.save()
         else:
-            new_rating = Rating(play=play, user=user, mark=request.data['mark'])
+            new_rating = Rating(
+                play=play,
+                user=user,
+                mark=request.data["mark"]
+            )
             new_rating.save()
 
-        return Response({'message': 'Rating set successfully.'}, status=status.HTTP_200_OK)
-
-
-
-
+        return Response(
+            {"message": "Rating set successfully."}, status=status.HTTP_200_OK
+        )
 
     @extend_schema(
         parameters=[
             OpenApiParameter(
                 name="genres",
                 type={"type": "array", "items": {"type": "number"}},
-                description="A list of genre IDs for filtering plays by genre.",
+                description="A list of genre IDs",
                 required=False,
             ),
             OpenApiParameter(
                 name="actors",
                 type={"type": "array", "items": {"type": "number"}},
-                description="A list of actor IDs for filtering plays by actor.",
+                description="A list of actor IDs",
                 required=False,
             ),
         ]
@@ -179,7 +192,9 @@ class ActorViewSet(
 
         if full_name:
             queryset = queryset.filter(
-                Q(first_name__icontains=full_name) | Q(last_name__icontains=full_name)
+                Q(
+                    first_name__icontains=full_name) | Q(
+                    last_name__icontains=full_name)
             )
 
         return queryset
@@ -188,7 +203,7 @@ class ActorViewSet(
         methods=["POST"],
         detail=True,
         url_path="upload-image",
-        permission_classes=[IsAdminUser]
+        permission_classes=[IsAdminUser],
     )
     def upload_image(self, request, pk=None):
         item = self.get_object()
@@ -199,11 +214,6 @@ class ActorViewSet(
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
-
 
     @extend_schema(
         parameters=[
@@ -270,8 +280,10 @@ class PerformanceViewSet(
             try:
                 performance_date = date.fromisoformat(date_param)
                 queryset = queryset.filter(show_time__date=performance_date)
-            except ValueError as e:
-                raise ParseError("Incorrect date format. Use the format 'YYYY-MM-DD'.")
+            except ValueError:
+                raise ParseError(
+                    "Incorrect date format. Use the format 'YYYY-MM-DD'."
+                )
 
         return queryset
 
@@ -289,7 +301,9 @@ class PerformanceViewSet(
             OpenApiParameter(
                 name="date",
                 type={"type": "string", "format": "date"},
-                description="Filter performances by date (format: YYYY-MM-DD).",
+                description=(
+                        "Filter performances by date (format: YYYY-MM-DD)."
+                ),
                 required=False,
             )
         ]

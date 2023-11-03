@@ -1,4 +1,4 @@
-from theatre.serializers import PlayListSerializer, PlaySerializer
+from theatre.serializers import PlayListSerializer
 from user.models import User
 from django.urls import reverse
 from rest_framework import status
@@ -20,8 +20,14 @@ class PlayFilterTests(TestCase):
         self.client = APIClient()
         self.genre1 = Genre.objects.create(name="Action")
         self.genre2 = Genre.objects.create(name="Drama")
-        self.actor1 = Actor.objects.create(first_name="John", last_name="Doe")
-        self.actor2 = Actor.objects.create(first_name="Jane", last_name="Smith")
+        self.actor1 = Actor.objects.create(
+            first_name="John",
+            last_name="Doe"
+        )
+        self.actor2 = Actor.objects.create(
+            first_name="Jane",
+            last_name="Smith"
+        )
         self.play1 = Play.objects.create(
             title="Play 1",
             description="Description 1",
@@ -96,7 +102,9 @@ class PlayAPITests(TestCase):
         self.assertEqual(response.data["title"], self.play.title)
         self.assertEqual(response.data["description"], self.play.description)
         self.assertEqual(response.data["genres"][0]["name"], self.genre.name)
-        self.assertEqual(response.data["actors"][0]["full_name"], self.actor.full_name)
+        self.assertEqual(
+            response.data["actors"][0]["full_name"],
+            self.actor.full_name)
 
 
 class PlayAccessTestCase(TestCase):
@@ -106,7 +114,10 @@ class PlayAccessTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(email="test@test.ua", password="test123")
+        self.user = User.objects.create_user(
+            email="test@test.ua",
+            password="test123"
+        )
         self.play = Play.objects.create(
             title="Test Play", description="Description of the test play"
         )

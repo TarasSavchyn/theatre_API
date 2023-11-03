@@ -1,6 +1,14 @@
 from django.db import transaction
 from rest_framework import serializers
-from .models import Play, Genre, Actor, TheatreHall, Performance, Reservation, Ticket
+from .models import (
+    Play,
+    Genre,
+    Actor,
+    TheatreHall,
+    Performance,
+    Reservation,
+    Ticket
+)
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -14,7 +22,12 @@ class ActorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Actor
-        fields = ["id", "first_name", "last_name", "full_name", ]
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "full_name",
+        ]
 
 
 class ActorListSerializer(serializers.ModelSerializer):
@@ -31,29 +44,47 @@ class ActorDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Actor
-        fields = ["id", "first_name", "last_name", "full_name", "foto", "filmography"]
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "full_name",
+            "foto",
+            "filmography"
+        ]
 
     def get_filmography(self, actor):
         filmography = [play.title for play in actor.play_set.all()]
         return filmography
 
 
-
-
 class ActorFotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Actor
-        fields = ("id", 'foto', )
+        fields = (
+            "id",
+            "foto",
+        )
 
 
 class PlaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Play
-        fields = ("id", "title", "description", "genres", "actors",)
+        fields = (
+            "id",
+            "title",
+            "description",
+            "genres",
+            "actors",
+        )
 
 
 class PlayListSerializer(serializers.ModelSerializer):
-    genres = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
+    genres = serializers.SlugRelatedField(
+        many=True,
+        read_only=True,
+        slug_field="name"
+    )
     actors = serializers.SlugRelatedField(
         many=True,
         read_only=True,
@@ -62,7 +93,14 @@ class PlayListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ("id", "title", "description", "genres", "actors", "average_rating")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "genres",
+            "actors",
+            "average_rating"
+        )
 
 
 class PlayDetailSerializer(serializers.ModelSerializer):
@@ -71,7 +109,14 @@ class PlayDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Play
-        fields = ("id", "title", "description", "genres", "actors", "average_rating")
+        fields = (
+            "id",
+            "title",
+            "description",
+            "genres",
+            "actors",
+            "average_rating"
+        )
 
 
 class SetRatingSerializer(serializers.Serializer):
@@ -119,7 +164,13 @@ class PerformanceDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Performance
-        fields = ["id", "play", "theatre_hall", "show_time", "available_tickets"]
+        fields = [
+            "id",
+            "play",
+            "theatre_hall",
+            "show_time",
+            "available_tickets"
+        ]
 
 
 class TicketSerializer(serializers.ModelSerializer):
@@ -145,7 +196,10 @@ class TicketSerializer(serializers.ModelSerializer):
 
         # checking booked places
         existing_tickets = Ticket.objects.filter(
-            performance=performance, row=row, seat=seat, reservation__status=True
+            performance=performance,
+            row=row,
+            seat=seat,
+            reservation__status=True
         )
 
         if existing_tickets.exists():
@@ -190,9 +244,11 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         for ticket_data in tickets_data:
             performance = ticket_data["performance"]
-            performance_id = performance.id  # Отримати ID вистави з об'єкта вистави
+            performance_id = performance.id
             Ticket.objects.create(
-                reservation=reservation, performance_id=performance_id, **ticket_data
+                reservation=reservation,
+                performance_id=performance_id,
+                **ticket_data
             )
 
         return reservation
