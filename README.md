@@ -1,5 +1,7 @@
 # API_Theatre
 
+![img.png](scheme/img.png)
+
 Our project is an innovative theater management system that simplifies and optimizes all aspects of theater life, 
 starting from the organization of the performance and ending with the form of free seats and ratings of the performance. 
 The main functions of the system include:
@@ -20,14 +22,16 @@ seats and their status.
 
 Our system helps theaters manage their activities efficiently, attract new audiences and provide a convenient way to reserve tickets. .
 
-## сontent
+## Content
 - [technology](#technology)
-- [testing](#testing)
+
 - [docker](#docker)
 - [using](#using)
+- [get access](#using)
 - [project developer](#project-developer)
+- [testing](#testing)
 
-## technology
+## Technology
 - [Python](https://www.python.org/)
 - [Django](https://www.djangoproject.com/)
 - [Django-Rest-Framework](https://www.django-rest-framework.org/)
@@ -48,6 +52,18 @@ Create a virtual environment and activate it using the following commands:
 $ python3 -m venv venv
 $ source venv/bin/activate
 ```
+
+Create file ".env" with the following content:
+```python
+POSTGRES_ENGINE=POSTGRES_ENGINE
+POSTGRES_NAME=POSTGRES_NAME
+POSTGRES_USER=POSTGRES_USER
+POSTGRES_PASSWORD=POSTGRES_PASSWORD
+POSTGRES_HOST=POSTGRES_HOST
+POSTGRES_PORT=POSTGRES_PORT
+SECRET_KEY=SECRET_KEY
+```
+
 Once you've activated your virtual environment install your python packages by running:
 ```sh
 $ pip install -r requirements.txt
@@ -72,6 +88,7 @@ POSTGRES_USER=POSTGRES_USER
 POSTGRES_PASSWORD=POSTGRES_PASSWORD
 POSTGRES_HOST=POSTGRES_HOST
 POSTGRES_PORT=POSTGRES_PORT
+SECRET_KEY=SECRET_KEY
 ```
 After that create the file "docker-compose.yml"
 ```python
@@ -100,6 +117,13 @@ $ docker push savik1992/theatre-app
 $ docker-compose up
 ```
 Welcome, the application is ready to use at url http://127.0.0.1:8000/admin/theatre/
+
+
+## Get access
+Registration http://127.0.0.1:8000/api/user/register/
+
+Token http://127.0.0.1:8000/api/user/login/
+
 
 ## Testing
 
