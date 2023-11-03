@@ -26,7 +26,7 @@ Our system helps theaters manage their activities efficiently, attract new audie
 
 ## Content
 - [technology](#technology)
-
+- [documentation](#documentation)
 - [docker](#docker)
 - [using](#using)
 - [get access](#using)
@@ -41,6 +41,12 @@ Our system helps theaters manage their activities efficiently, attract new audie
 - [Django-Debug-Toolbar](https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#process)
 - [Docker](https://www.docker.com/)
 - [TestCase](https://docs.djangoproject.com/en/4.2/topics/testing/tools/)
+
+
+## Documentation
+http://127.0.0.1:8000/api/doc/swagger/
+
+http://127.0.0.1:8000/api/doc/redoc/
 
 ## Using
 Clone the repository from GitHub:
