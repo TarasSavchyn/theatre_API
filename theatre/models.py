@@ -23,7 +23,7 @@ def actor_foto_file_path(instance, filename):
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.full_name)}-{uuid.uuid4()}{extension}"
 
-    return os.path.join("uploads/theater/", filename)
+    return os.path.join("uploads", "theater", filename)
 
 
 class Actor(models.Model):
@@ -172,6 +172,3 @@ class Rating(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.play.update_average_rating()
-
-    class Meta:
-        unique_together = ["play", "user"]

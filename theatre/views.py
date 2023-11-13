@@ -55,17 +55,11 @@ class PlayViewSet(
             genres_ids = [int(str_id) for str_id in genres.split(",")]
             queryset = Play.objects.filter(genres__id__in=genres_ids)
 
-            for genre_id in genres_ids:
-                queryset = queryset.filter(genres__id=genre_id)
-
         # filtering by actors
         actors = self.request.query_params.get("actors")
         if actors:
             actors_ids = [int(str_id) for str_id in actors.split(",")]
             queryset = Play.objects.filter(actors__id__in=actors_ids)
-
-            for actor_id in actors_ids:
-                queryset = queryset.filter(actors__id=actor_id)
 
         return queryset.distinct()
 
@@ -91,24 +85,29 @@ class PlayViewSet(
         ],
     )
     def evaluate(self, request, pk=None):
-        play = self.get_object()
-        user = request.user
-        existing_rating = Rating.objects.filter(play=play, user=user).first()
+        try:
+            mark = float(request.data["mark"])
+            play_instance = self.get_object()
+            user_instance = request.user
 
-        if existing_rating:
-            existing_rating.mark = request.data["mark"]
-            existing_rating.save()
-        else:
-            new_rating = Rating(
-                play=play,
-                user=user,
-                mark=request.data["mark"]
+            rating_instance, _ = Rating.objects.update_or_create(
+                user=user_instance,
+                play=play_instance,
+                defaults={"mark": mark}
             )
-            new_rating.save()
 
-        return Response(
-            {"message": "Rating set successfully."}, status=status.HTTP_200_OK
-        )
+            rating_instance.mark = mark
+            rating_instance.save()
+
+            return Response(
+                {"message": "Rating set successfully."},
+                status=status.HTTP_200_OK
+            )
+        except (ValueError, TypeError):
+            return Response(
+                {"error": "Invalid 'mark' in the request data."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     @extend_schema(
         parameters=[

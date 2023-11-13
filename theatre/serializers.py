@@ -54,8 +54,7 @@ class ActorDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_filmography(self, actor):
-        filmography = [play.title for play in actor.play_set.all()]
-        return filmography
+        return list(actor.play_set.values_list("title", flat=True))
 
 
 class ActorFotoSerializer(serializers.ModelSerializer):

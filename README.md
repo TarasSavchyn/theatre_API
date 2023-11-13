@@ -9,8 +9,8 @@ The main functions of the system include:
 - Play and Actor: Detailed information about plays, including titles, descriptions, genres, and actors involved. Actors 
 also have their own profiles with pictures.
 
-- Performance: The system allows you to easily add and manage performances and screenings in different theater halls, i
-ncluding information about times and seat availability.
+- Performance: The system allows you to easily add and manage performances and screenings in different theater halls, 
+including information about times and seat availability.
 
 - Reservation : Users can reserve tickets for their desired shows and performances. The system keeps track of reserved 
 seats and their status.
