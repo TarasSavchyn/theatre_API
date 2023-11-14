@@ -1,4 +1,3 @@
-from django.urls import path
 from rest_framework import routers
 
 from theatre.views import (
@@ -19,12 +18,7 @@ router.register(r"theatrehalls", TheatreHallViewSet)
 router.register(r"performances", PerformanceViewSet)
 router.register(r"reservations", ReservationViewSet)
 
-urlpatterns = [
-    path(
-        "reservations/<int:pk>/cancel/",
-        ReservationViewSet.as_view({"post": "cancel_reservation"}),
-        name="reservation-cancel",
-    ),
-] + router.urls
+
+urlpatterns = router.urls
 
 app_name = "theatre"
